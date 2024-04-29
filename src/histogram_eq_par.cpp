@@ -4,7 +4,6 @@
 
 #include "histogram_eq.h"
 #include <omp.h>
-#include <cmath>
 
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
@@ -21,47 +20,43 @@ namespace cp {
         return clamp(static_cast<unsigned char>(255 * (cdf_val - cdf_min) / (1 - cdf_min)));
     }
 
-    void cdf_min_loop(float &cdf_min, float (&cdf)[256]) {
-        for (int i = 1; i < HISTOGRAM_LENGTH; i++)
-            cdf_min = std::min(cdf_min, cdf[i]);
-    }
-
-    void calculate_cdf(float (&cdf)[256], int (&histogram)[256], const int size) {
-        cdf[0] = prob(histogram[0], size);
-        for (int i = 1; i < HISTOGRAM_LENGTH; i++)
-            cdf[i] = cdf[i - 1] + prob(histogram[i], size);
-    }
-
-    void fill_histogram(int (&histogram)[256], const int size, const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
-        std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
-        for (int i = 0; i < size; i++)
-            histogram[gray_image[i]]++;
-    }
-
-    void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
-                          const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
-        #pragma omp parallel for collapse(2) schedule(static, chunk_size)
-        for (int i = 0; i < height; i++)
-            for (int j = 0; j < width; j++) {
-                auto idx = i * width + j;
-                auto r = uchar_image[3 * idx];
-                auto g = uchar_image[3 * idx + 1];
-                auto b = uchar_image[3 * idx + 2];
-                gray_image[idx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
-            }
-    }
-
     void normalize(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image,
                    const float *input_image_data,int chunk_size_channels) {
-        #pragma omp parallel for schedule(static, chunk_size_channels)
+        #pragma omp parallel for schedule(dynamic, chunk_size_channels)
         for (int i = 0; i < size_channels; i++)
             uchar_image[i] = (unsigned char) (255 * input_image_data[i]);
     }
 
-    void rescale(const int size_channels, float *output_image_data, const std::shared_ptr<unsigned char[]> &uchar_image,int chunk_size_channels) {
-        #pragma omp parallel for schedule(dynamic, chunk_size_channels)
-        for (int i = 0; i < size_channels; i++)
-            output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
+    void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
+                          const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
+        std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
+        #pragma omp parallel for reduction(+:histogram)
+        for (int i = 0; i < size; i++){
+                auto r = uchar_image[3 * i];
+                auto g = uchar_image[3 * i + 1];
+                auto b = uchar_image[3 * i + 2];
+                gray_image[i] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
+                histogram[gray_image[i]]++;
+            }
+    }
+
+    void fill_histogram(int (&histogram)[256], const int size, const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
+        std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
+        #pragma omp parallel for schedule(static, chunk_size) reduction(+:histogram)
+        for (int i = 0; i < size; i++)
+            histogram[gray_image[i]]++;
+    }
+
+    void calculate_cdf(float (&cdf)[256], int (&histogram)[256], const int size) {
+        cdf[0] = prob(histogram[0], size);
+        for (int i = 1; i < HISTOGRAM_LENGTH; i++) {
+            cdf[i] = cdf[i - 1] + prob(histogram[i], size);
+        }
+    }
+
+    void cdf_min_loop(float &cdf_min, float (&cdf)[256]) {
+        for (int i = 1; i < HISTOGRAM_LENGTH; i++)
+            cdf_min = std::min(cdf_min, cdf[i]);
     }
 
     void correct_color_loop(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image, float (&cdf)[256],
@@ -69,6 +64,12 @@ namespace cp {
         #pragma omp parallel for schedule(static, chunk_size_channels)
         for (int i = 0; i < size_channels; i++)
             uchar_image[i] = correct_color(cdf[uchar_image[i]], cdf_min);
+    }
+
+    void rescale(const int size_channels, float *output_image_data, const std::shared_ptr<unsigned char[]> &uchar_image,int chunk_size_channels) {
+        #pragma omp parallel for schedule(dynamic, chunk_size_channels)
+            for (int i = 0; i < size_channels; i++)
+                output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
     }
 
     static void histogram_equalization(const int width, const int height,
@@ -86,14 +87,14 @@ namespace cp {
         const auto chunk_size_channels = size_channels / omp_get_num_procs();
 
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
-        extractGrayScale(height, width, uchar_image, gray_image, chunk_size);
+        extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
 
-        fill_histogram(histogram, size, gray_image, chunk_size);
+        //fill_histogram(histogram, size, gray_image, chunk_size);
 
-        calculate_cdf(cdf, histogram, size);
+        calculate_cdf(cdf, histogram,size);
 
         auto cdf_min = cdf[0];
-        cdf_min_loop(cdf_min, cdf);
+        //cdf_min_loop(cdf_min, cdf);
 
         correct_color_loop(size_channels, uchar_image, cdf, cdf_min, chunk_size_channels);
         rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
