@@ -7,7 +7,7 @@
 
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
-
+    int n_threads = 1;
     static float inline prob(const int x, const int size) {
         return (float) x / (float) size;
     }
@@ -22,7 +22,7 @@ namespace cp {
 
     void normalize(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image,
                    const float *input_image_data,int chunk_size_channels) {
-        #pragma omp parallel for schedule(dynamic, chunk_size_channels)
+        #pragma omp parallel for schedule(dynamic, chunk_size_channels) num_threads(n_threads)
         for (int i = 0; i < size_channels; i++)
             uchar_image[i] = (unsigned char) (255 * input_image_data[i]);
     }
@@ -30,7 +30,7 @@ namespace cp {
     void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
-        #pragma omp parallel for reduction(+:histogram)
+        #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
                 auto r = uchar_image[3 * i];
                 auto g = uchar_image[3 * i + 1];
@@ -42,7 +42,7 @@ namespace cp {
 
     void fill_histogram(int (&histogram)[256], const int size, const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
-        #pragma omp parallel for schedule(static, chunk_size) reduction(+:histogram)
+        #pragma omp parallel for schedule(static, chunk_size) reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++)
             histogram[gray_image[i]]++;
     }
@@ -61,13 +61,13 @@ namespace cp {
 
     void correct_color_loop(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image, float (&cdf)[256],
                        float cdf_min, int chunk_size_channels) {
-        #pragma omp parallel for schedule(static, chunk_size_channels)
+        #pragma omp parallel for schedule(static, chunk_size_channels) num_threads(n_threads)
         for (int i = 0; i < size_channels; i++)
             uchar_image[i] = correct_color(cdf[uchar_image[i]], cdf_min);
     }
 
     void rescale(const int size_channels, float *output_image_data, const std::shared_ptr<unsigned char[]> &uchar_image,int chunk_size_channels) {
-        #pragma omp parallel for schedule(dynamic, chunk_size_channels)
+        #pragma omp parallel for schedule(dynamic, chunk_size_channels) num_threads(n_threads)
             for (int i = 0; i < size_channels; i++)
                 output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
     }
@@ -83,8 +83,8 @@ namespace cp {
         constexpr auto channels = 3;
         const auto size = width * height;
         const auto size_channels = size * channels;
-        const auto chunk_size = size / omp_get_num_procs();
-        const auto chunk_size_channels = size_channels / omp_get_num_procs();
+        const auto chunk_size = size / n_threads;
+        const auto chunk_size_channels = size_channels / n_threads;
 
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
@@ -100,8 +100,8 @@ namespace cp {
         rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
     }
 
-    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations) {
-
+    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
+        n_threads = num_threads;
         const auto width = wbImage_getWidth(input_image);
         const auto height = wbImage_getHeight(input_image);
         constexpr auto channels = 3;

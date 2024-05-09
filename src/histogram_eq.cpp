@@ -62,8 +62,7 @@ namespace cp {
             output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
     }
 
-    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations) {
-
+    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
         const auto width = wbImage_getWidth(input_image);
         const auto height = wbImage_getHeight(input_image);
         constexpr auto channels = 3;

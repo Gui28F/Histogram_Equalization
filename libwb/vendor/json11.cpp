@@ -180,7 +180,7 @@ protected:
   }
 
   bool less(const JsonValue *other) const override {
-    return m_value < static_cast<const Value<tag, T> *>(other)->m_value;
+    return false;
   }
 
   const T m_value;
