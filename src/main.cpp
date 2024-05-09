@@ -1,8 +1,7 @@
-
 #include "histogram_eq.h"
-#include <cstdlib>
-#include <chrono>
+#include <iostream>
 #include <fstream>
+#include <chrono>
 
 int main(int argc, char **argv) {
     if (argc != 4) {
@@ -10,44 +9,38 @@ int main(int argc, char **argv) {
         return 1;
     }
     int n_iterations = static_cast<int>(std::strtol(argv[2], nullptr, 10));
-    // Number of iterations to test
     constexpr int num_threads = 20;
 
-    // Array to store execution times
-    double execution_times[num_threads] = {0};
-
-    // Repeat for each number of iterations
+    constexpr int num_executions = 10;
+    // Array to store execution times for each thread and each iteration
+    double execution_times[num_threads][num_executions] = {0}; // Assuming at most 10 iterations
+    // Repeat for each number of threads
     for (int i = 1; i <= num_threads; ++i) {
-        std::cout << i;
-        std::cout<<"\n";
-        double total_time = 0;
+        std::cout << i << std::endl;
 
-        // Perform 10 executions and calculate average time
-        constexpr int num_executions = 10;
-        for (int j = 0; j < num_executions; j++) {
+        // Perform 10 executions and store execution times for each iteration
+        for (int j = 0; j < num_executions; ++j) {
             wbImage_t inputImage = wbImport(argv[1]);
             auto start = std::chrono::high_resolution_clock::now();
             wbImage_t outputImage = cp::iterative_histogram_equalization(inputImage, n_iterations, i);
             auto stop = std::chrono::high_resolution_clock::now();
-            total_time += std::chrono::duration<double, std::milli>(stop - start).count();
-            wbExport(argv[3],outputImage);
+            double execution_time = std::chrono::duration<double, std::milli>(stop - start).count();
+            execution_times[i - 1][j] = execution_time;
+            wbExport(argv[3], outputImage);
         }
-        // Calculate average time for current iteration count
-        std::cout<< total_time/num_executions;
-        std::cout<<"\n";
-        execution_times[i-1] = total_time / num_executions;
-
     }
 
-    // Output the average times
-    for (int i = 0; i < num_threads; ++i) {
-        std::cout << "Iterations: " << i + 1 << ", Average Time (ms): " << execution_times[i] << std::endl;
-    }
-    // Output the average times to a file
+    // Output the execution times
     std::ofstream outfile("execution_times.txt");
     if (outfile.is_open()) {
         for (int i = 0; i < num_threads; ++i) {
-            outfile << i + 1 << ", " << execution_times[i] << std::endl;
+            outfile << i + 1 << ": ";
+            for (int j = 0; j < num_executions; ++j) {
+                outfile << execution_times[i][j];
+                if (j < num_executions - 1)
+                    outfile << ", ";
+            }
+            outfile << std::endl;
         }
         outfile.close();
         std::cout << "Execution times saved to 'execution_times.txt'." << std::endl;

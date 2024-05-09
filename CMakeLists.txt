@@ -56,7 +56,7 @@ include_directories(include)
 
 add_executable(project_par
         src/main.cpp
-        src/histogram_eq_par.cu
+        src/histogram_eq_par.cpp
 )
 
 target_link_libraries(project_par PUBLIC OpenMP::OpenMP_CXX wb)

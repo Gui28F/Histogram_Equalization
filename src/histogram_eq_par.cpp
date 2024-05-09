@@ -41,19 +41,17 @@ namespace cp {
      */
 
     __global__ void rgb2gray_cuda(unsigned char* gray_image, const unsigned char* uchar_image, int width, int height) {
-        int jj = blockIdx.x * blockDim.x + threadIdx.x;
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
-
+        int jj = blockIdx.x * blockDim.x + threadIdx.x;
         // Check if the thread is within the image boundaries
         if (ii < height && jj < width) {
             // Calculate the index for accessing the RGB image
-            int rgbIdx = (ii * width + jj) * 3;
-
+            int rgbIdx = ii * width + jj;
             // Convert RGB to grayscale using luminosity method
-            auto r = uchar_image[rgbIdx];
-            auto g = uchar_image[rgbIdx + 1];
-            auto b = uchar_image[rgbIdx + 2];
-            gray_image[ii * width + jj] = static_cast<unsigned char>(0.21f * r + 0.71f * g + 0.07f * b);
+            auto r = uchar_image[rgbIdx* 3];
+            auto g = uchar_image[rgbIdx* 3 + 1];
+            auto b = uchar_image[rgbIdx* 3 + 2];
+            gray_image[rgbIdx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
         }
     }
 
@@ -61,35 +59,30 @@ namespace cp {
                   std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256], const int size, int chunk_size) {
 
         // Allocate memory for the output grayscale image
-        gray_image.reset(new unsigned char[size]);
-
+        //gray_image.reset(new unsigned char[size]);
+        printf("w: %d h: %d\n", width, height);
         // Declare and allocate memory for device buffers
         unsigned char *deviceInputImageData, *deviceOutputImageData;
-        cudaMalloc((void **)&deviceInputImageData, width * height * 3 * sizeof(unsigned char));
-        cudaMalloc((void **)&deviceOutputImageData, size * sizeof(unsigned char));
+        cudaMalloc(&deviceInputImageData, width * height * 3 * sizeof(unsigned char));
+        cudaMalloc(&deviceOutputImageData, size * sizeof(unsigned char));
 
         // Copy input image to device
         cudaMemcpy(deviceInputImageData, uchar_image.get(), width * height * 3 * sizeof(unsigned char), cudaMemcpyHostToDevice);
 
         // Define thread block dimensions and grid dimensions
         dim3 dimBlock(16, 16); // 16x16 threads per block
-        dim3 dimGrid((width - 1) / dimBlock.x + 1, (height - 1) / dimBlock.y + 1); // Adjust grid size based on image dimensions
+        dim3 dimGrid((width - 1) / dimBlock.x + 1, (height - 1) / dimBlock.y + 1);
 
         // Launch kernel
         rgb2gray_cuda<<<dimGrid, dimBlock>>>(deviceOutputImageData, deviceInputImageData, width, height);
 
         // Copy output image back to host
-        cudaMemcpy(gray_image.get(), deviceOutputImageData, size * sizeof(unsigned char), cudaMemcpyDeviceToHost);
+        cudaMemcpy(gray_image.get(), deviceOutputImageData, width * height * sizeof(unsigned char), cudaMemcpyDeviceToHost);
 
         // Free device memory
         cudaFree(deviceInputImageData);
         cudaFree(deviceOutputImageData);
 
-        // Compute histogram
-        std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
-        for (int i = 0; i < size; i++) {
-            histogram[gray_image[i]]++;
-        }
     }
 
     /**
