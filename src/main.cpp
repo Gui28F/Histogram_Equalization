@@ -30,12 +30,13 @@ int main(int argc, char **argv) {
             wbImage_t outputImage = cp::iterative_histogram_equalization(inputImage, n_iterations, i);
             auto stop = std::chrono::high_resolution_clock::now();
             total_time += std::chrono::duration<double, std::milli>(stop - start).count();
+            wbExport(argv[3],outputImage);
         }
-
         // Calculate average time for current iteration count
         std::cout<< total_time/num_executions;
         std::cout<<"\n";
         execution_times[i-1] = total_time / num_executions;
+
     }
 
     // Output the average times

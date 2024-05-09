@@ -56,11 +56,11 @@ include_directories(include)
 
 add_executable(project_par
         src/main.cpp
-        src/histogram_eq_par.cpp
+        src/histogram_eq_par.cu
 )
 
 target_link_libraries(project_par PUBLIC OpenMP::OpenMP_CXX wb)
-target_compile_options(project_par PRIVATE -O2 -ftree-vectorize -fopt-info-vec-optimized)
+#target_compile_options(project_par PRIVATE -O2 -ftree-vectorize -fopt-info-vec-optimized)
 
 ##############################################################
 # Tests

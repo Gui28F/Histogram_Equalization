@@ -37,7 +37,9 @@ RUN echo 'debugger:pwd' | chpasswd
 ########################################################
 # Add custom packages and development environment here
 ########################################################
-
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-12.4/lib64
+ENV PATH=$PATH:/usr/local/cuda-12.4/bin
+ENV CUDA_HOME=/usr/local/cuda-12.4
 ########################################################
 
 CMD ["/usr/sbin/sshd", "-D"]
