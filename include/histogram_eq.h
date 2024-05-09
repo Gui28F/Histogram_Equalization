@@ -5,6 +5,8 @@
 
 namespace cp {
     wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations = 1, int num_threads = 1);
+    wbImage_t seq_iterative_histogram_equalization(wbImage_t &input_image, int iterations = 1, int num_threads = 1);
+    wbImage_t par_iterative_histogram_equalization(wbImage_t &input_image, int iterations = 1, int num_threads = 1);
 }
 
 #endif //CP_PROJECT_HISTOGRAM_EQ_H

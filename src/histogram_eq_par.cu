@@ -239,7 +239,7 @@ namespace cp {
         rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
     }
 
-    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
+    wbImage_t par_iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
         n_threads = num_threads;
         const auto width = wbImage_getWidth(input_image);
         const auto height = wbImage_getHeight(input_image);
@@ -267,5 +267,9 @@ namespace cp {
         }
 
         return output_image;
+    }
+    wbImage_t iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
+
+        return par_iterative_histogram_equalization(input_image, iterations, num_threads);
     }
 }
