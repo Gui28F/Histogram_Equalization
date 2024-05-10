@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  9 MAY 2024 23:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  10 MAY 2024 17:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1031,11 +1031,16 @@ local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc}
 
 {/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{
 /usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}]
-<images/speedup.png, id=77, 481.8pt x 354.57469pt>
-File: images/speedup.png Graphic file (type png)
-<use images/speedup.png>
-Package pdftex.def Info: images/speedup.png  used on input line 138.
-(pdftex.def)             Requested size: 241.14749pt x 177.46544pt.
+<images/time_distribution.png, id=81, 462.528pt x 346.896pt>
+File: images/time_distribution.png Graphic file (type png)
+<use images/time_distribution.png>
+Package pdftex.def Info: images/time_distribution.png  used on input line 136.
+(pdftex.def)             Requested size: 241.14749pt x 180.86334pt.
+<images/speedup2.png, id=83, 462.528pt x 346.896pt>
+File: images/speedup2.png Graphic file (type png)
+<use images/speedup2.png>
+Package pdftex.def Info: images/speedup2.png  used on input line 146.
+(pdftex.def)             Requested size: 241.14749pt x 180.86334pt.
 
 No file template.bbl.
 
@@ -1049,37 +1054,47 @@ Package balance Warning: You have called \balance in second column
 (balance)                Columns might not be balanced.
 
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 198.
+(Font)              scaled to size 9.0pt on input line 165.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 7.0pt on input line 198.
+(Font)              scaled to size 7.0pt on input line 165.
 (/usr/local/texlive/2023/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 )
 (/usr/local/texlive/2023/texmf-dist/tex/generic/stringenc/se-utf8.def
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
-) [2.2 <./images/speedup.png>] (./template.aux)
-Package rerunfilecheck Info: File `template.out' has not changed.
-(rerunfilecheck)             Checksum: 7B0EB477450D94E17FDBD611F824414B;958.
+) [2.2{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f
+.enc} <./images/time_distribution.png> <./images/speedup2.png>] (./template.aux
+)
+
+Package rerunfilecheck Warning: File `template.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `template.out':
+(rerunfilecheck)             Before: 9C0F07276A2F21B601E1462C0CC71715;1080
+(rerunfilecheck)             After:  994941E37615CF578D378AADB038D6EE;1050.
  ) 
 Here is how much of TeX's memory you used:
- 22689 strings out of 476025
- 362397 string characters out of 5790018
+ 22699 strings out of 476025
+ 362573 string characters out of 5790018
  2342388 words of memory out of 5000000
- 42334 multiletter control sequences out of 15000+600000
- 620528 words of font info for 206 fonts, out of 8000000 for 9000
+ 42342 multiletter control sequences out of 15000+600000
+ 621922 words of font info for 206 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  85i,12n,131p,1005b,1347s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/inconsolata/Inconsolat
 a-zi4b.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/inconsolata/I
-nconsolata-zi4r.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/libe
-rtine/LinBiolinumT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/l
-ibertine/LinBiolinumTB.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/publ
-ic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
-public/libertine/LinLibertineTB.pfb>
-Output written on template.pdf (2 pages, 380477 bytes).
+nconsolata-zi4r.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/newt
+x/LibertineMathMI.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public/li
+bertine/LinBiolinumT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/public
+/libertine/LinBiolinumTB.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/pu
+blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
+1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
+/type1/public/newtx/txmiaX.pfb>
+Output written on template.pdf (2 pages, 411184 bytes).
 PDF statistics:
- 131 PDF objects out of 1000 (max. 8388607)
- 108 compressed objects within 2 object streams
- 46 named destinations out of 1000 (max. 500000)
- 57926 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 153 PDF objects out of 1000 (max. 8388607)
+ 124 compressed objects within 2 object streams
+ 48 named destinations out of 1000 (max. 500000)
+ 62035 words of extra memory for PDF output out of 74296 (max. 10000000)
 
