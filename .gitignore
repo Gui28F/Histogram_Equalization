@@ -1,3 +1,4 @@
+CUDA docker/cuda_12.4.1_550.54.15_linux.run
 *.idea
 cmake-build-release*
 

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-base-ubuntu22.04
+FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 
 ########################################################
 # Essential packages for remote debugging and login in
@@ -13,10 +13,13 @@ RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.2
     ./cmake-3.20.1-Linux-x86_64.sh --skip-license --prefix=/usr/local && \
     rm cmake-3.20.1-Linux-x86_64.sh
 
-# Install CUDA Toolkit \
-RUN wget -q https://developer.download.nvidia.com/compute/cuda/12.4.1/local_installers/cuda_12.4.1_550.54.15_linux.run && \
-    chmod +x cuda_12.4.1_550.54.15_linux.run && \
-    ./cuda_12.4.1_550.54.15_linux.run --toolkit --silent
+# Copy CUDA Toolkit installer from local directory
+COPY cuda_12.4.1_550.54.15_linux.run /tmp/cuda_12.4.1_550.54.15_linux.run
+
+# Install CUDA Toolkit from local installer
+RUN chmod +x /tmp/cuda_12.4.1_550.54.15_linux.run && \
+    /tmp/cuda_12.4.1_550.54.15_linux.run --toolkit --silent && \
+    rm /tmp/cuda_12.4.1_550.54.15_linux.run
 
 RUN mkdir /var/run/sshd
 RUN echo 'root:root' | chpasswd

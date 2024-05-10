@@ -4,6 +4,7 @@
 
 #include "histogram_eq.h"
 #include <omp.h>
+#include "cuda_runtime.h"
 
 #define TILE_WIDTH 16
 
@@ -60,7 +61,7 @@ namespace cp {
 
         // Allocate memory for the output grayscale image
         //gray_image.reset(new unsigned char[size]);
-        printf("w: %d h: %d\n", width, height);
+        //printf("w: %d h: %d\n", width, height);
         // Declare and allocate memory for device buffers
         unsigned char *deviceInputImageData, *deviceOutputImageData;
         cudaMalloc(&deviceInputImageData, width * height * 3 * sizeof(unsigned char));
@@ -218,8 +219,8 @@ namespace cp {
         const auto chunk_size_channels = size_channels / n_threads;
 
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
-        //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
-        extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
+        rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
+        //extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
 
         //fill_histogram(histogram, size, gray_image, chunk_size);
 
