@@ -4,6 +4,8 @@
 
 #include "histogram_eq.h"
 #include <omp.h>
+#include <iostream>
+#include <fstream>
 
 
 namespace cp {
@@ -34,6 +36,15 @@ namespace cp {
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
         int counter = 0;
+        std::ofstream outputfile;
+
+        outputfile.open("open.txt");
+
+        if(!outputfile) {
+            std::cerr << "Error opening file!" << std::endl;
+            exit(1);
+        }
+
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
                 auto r = uchar_image[3 * i];
@@ -41,12 +52,15 @@ namespace cp {
                 auto b = uchar_image[3 * i + 2];
                 gray_image[i] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
 
-                std::printf("%hhu\n",gray_image[i]);
-                //else
-                    //exit(1);
+
+
+                //std::printf("%hhu\n", gray_image[i]);
+                //outputfile << static_cast<unsigned int>(gray_image[i]) << std::endl;
+
                 histogram[gray_image[i]]++;
+
         }
-        exit(1);
+        //exit(1);
 
     }
 
@@ -101,12 +115,19 @@ namespace cp {
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
         //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
-        /*
-        for(int i = 0; i <HISTOGRAM_LENGTH; i++)
+
+        /**
+        int counter = 0;
+        for(int i = 0; i <HISTOGRAM_LENGTH; i++) {
             printf("%d\n", histogram[i]);
+            counter++;
+        }
+        printf("%d\n",counter);
         printf("\n");
         exit(1);
-        */
+         */
+
+
         //fill_histogram(histogram, size, gray_image, chunk_size);
 
         calculate_cdf(cdf, histogram,size);
