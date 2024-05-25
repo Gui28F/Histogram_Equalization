@@ -33,14 +33,21 @@ namespace cp {
     void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
+        int counter = 0;
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
                 auto r = uchar_image[3 * i];
                 auto g = uchar_image[3 * i + 1];
                 auto b = uchar_image[3 * i + 2];
                 gray_image[i] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
+
+                std::printf("%hhu\n",gray_image[i]);
+                //else
+                    //exit(1);
                 histogram[gray_image[i]]++;
-            }
+        }
+        exit(1);
+
     }
 
    /* void fill_histogram(int (&histogram)[256], const int size, const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
@@ -94,12 +101,18 @@ namespace cp {
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
         //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
-
+        /*
+        for(int i = 0; i <HISTOGRAM_LENGTH; i++)
+            printf("%d\n", histogram[i]);
+        printf("\n");
+        exit(1);
+        */
         //fill_histogram(histogram, size, gray_image, chunk_size);
 
         calculate_cdf(cdf, histogram,size);
 
         auto cdf_min = cdf[0];
+        std::printf("%f\n",cdf[255]);
         //cdf_min_loop(cdf_min, cdf);
 
         correct_color_loop_and_rescale(size_channels, uchar_image, cdf, cdf_min, output_image_data, chunk_size_channels);

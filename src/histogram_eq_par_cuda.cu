@@ -32,6 +32,15 @@ namespace cp {
         }
     }
 
+    __global__ void calculateProb_Kernel( const int* histogram, float* probabilities, int size) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < HISTOGRAM_LENGTH) {
+            // This is what the probability function call does
+            probabilities[idx] = (float)histogram[idx] / (float)size;
+        }
+    }
+
+
     __global__ void rescale_kernel(int width, const int size_channels, float *output_image_data, const unsigned char *uchar_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
@@ -43,21 +52,78 @@ namespace cp {
         }
     }
 
-    void histogram_equalization(int width,int height, int size_channels, int size,
+
+    __global__ void correct_kernel(int width, const int size_channels, const float *d_cdf, unsigned char *uchar_image) {
+        int ii = blockIdx.y * blockDim.y + threadIdx.y;
+        int jj = blockIdx.x * blockDim.x + threadIdx.x;
+        int idx = ii * width + jj;
+
+        // Check if idx is within bounds
+        if (idx < size_channels) {
+            float cdf_min = d_cdf[0];
+            auto cdf_val = d_cdf[uchar_image[idx]];
+            auto a_temp = static_cast<unsigned char>(255 * (cdf_val - cdf_min) / (1 - cdf_min));
+            auto a_clamp = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
+            uchar_image[idx] = a_clamp;
+        }
+    }
+
+    void histogram_equalization(int width,int height, int size_channels,
                             float *d_input_image_data,
                             float *d_output_image_data,
                             unsigned char *d_uchar_image,
                             unsigned char *d_gray_image,
                             int *d_histogram,
                             float *d_cdf) {
+        int size = width * height;
         dim3 dimBlock(TILE_WIDTH, TILE_WIDTH);
         dim3 dimGrid((width - 1) / TILE_WIDTH + 1, (height - 1) / TILE_WIDTH + 1);
         normalize_kernel<<<dimGrid, dimBlock>>>(width, size_channels, d_uchar_image, d_input_image_data);
         cudaDeviceSynchronize();
         extractGrayScale_kernel<<<dimGrid, dimBlock>>>(width, height,d_uchar_image, d_gray_image);
         cudaDeviceSynchronize();
-        rescale_kernel<<<dimGrid, dimBlock>>>(height, size_channels, d_output_image_data, d_uchar_image);
+
+        unsigned  char *h;
+        h = (unsigned  char *)malloc(size * sizeof(unsigned char));
+        cudaMemcpy(h, d_gray_image, size * sizeof(unsigned char), cudaMemcpyDeviceToHost);
+        unsigned  char max;
+        for(int i = 0; i <size; i++) {
+            if (h[i] > max)
+                max = h[i];
+            printf("%hhu\n", h[i]);
+        }
+        printf("The max value is %hhu\n", max);
+        free(h);
+        exit(1);
+
+        void* d_temp_storage = nullptr;
+        size_t temp_storage_bytes = 0;
+        cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, 225, size);
+        cudaMalloc(&d_temp_storage, temp_storage_bytes);
+        cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, 225, size);
+        cudaFree(d_temp_storage);
         cudaDeviceSynchronize();
+
+        int blockSize = 256;
+        int numBlocks = (HISTOGRAM_LENGTH + blockSize - 1) / blockSize;
+        calculateProb_Kernel<<<numBlocks, blockSize>>>(d_histogram, d_cdf, size);
+        cudaDeviceSynchronize();
+
+        d_temp_storage = nullptr;
+        temp_storage_bytes = 0;
+        cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
+        cudaMalloc(&d_temp_storage, temp_storage_bytes);
+        cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
+        cudaFree(d_temp_storage);
+        cudaDeviceSynchronize();
+
+        //auto cdf_min = d_cdf[0]; This crashed for some reason
+        correct_kernel<<<dimGrid, dimBlock>>>(width, size_channels, d_cdf, d_uchar_image);
+        cudaDeviceSynchronize();
+
+        rescale_kernel<<<dimGrid, dimBlock>>>(width, size_channels, d_output_image_data, d_uchar_image);
+        cudaDeviceSynchronize();
+
     }
 
     wbImage_t cuda_par_iterative_histogram_equalization(wbImage_t &input_image, int iterations) {
@@ -95,7 +161,7 @@ namespace cp {
         cudaMalloc(&d_cdf, HISTOGRAM_LENGTH * sizeof(float));
 
         for (int i = 0; i < iterations; i++){
-            histogram_equalization(width, height, size_channels, size,
+            histogram_equalization(width, height, size_channels,
                                    d_input_image_data, d_output_image_data,
                                    d_uchar_image, d_gray_image,
                                    d_histogram, d_cdf);
