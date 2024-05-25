@@ -26,7 +26,9 @@ int main(int argc, char **argv) {
             auto stop = std::chrono::high_resolution_clock::now();
             double execution_time = std::chrono::duration<double, std::milli>(stop - start).count();
             execution_times[i - 1][j] = execution_time;
-            wbExport(argv[3], outputImage);
+            //wbExport(argv[3], outputImage);
+            std::cout << execution_time;
+            std::cout <<"\n";
         }
     }
 

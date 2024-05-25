@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(project)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -8,9 +7,13 @@ set( CMAKE_CUDA_FLAGS "" CACHE STRING "" )
 if ( CMAKE_CUDA_FLAGS )
     list(REMOVE_ITEM CMAKE_CUDA_FLAGS "--cudart static")
 endif()
-string(APPEND CMAKE_CUDA_FLAGS "--cudart shared")
-project(cp-gpu LANGUAGES CXX CUDA)
-set(CMAKE_CXX_STANDARD 14)
+project(project LANGUAGES CXX CUDA)
+# Find OpenMP package
+find_package(OpenMP REQUIRED)
+string(APPEND CMAKE_CUDA_FLAGS " --cudart shared")
+string(APPEND CMAKE_CUDA_FLAGS " -Xcompiler=${OpenMP_CXX_FLAGS}")
+
+
 ##############################################################
 # Autodetect CUDA architecture(s)
 ##############################################################
@@ -21,13 +24,13 @@ string(STRIP "${INSTALLED_GPU_CCS_1}" INSTALLED_GPU_CCS_2)
 string(REPLACE " " ";" INSTALLED_GPU_CCS_3 "${INSTALLED_GPU_CCS_2}")
 string(REPLACE "." "" CUDA_ARCH_LIST "${INSTALLED_GPU_CCS_3}")
 # Remove "86+PTX" from each element of CUDA_ARCH_LIST if present
-foreach(arch ${CUDA_ARCH_LIST})
-    string(REPLACE "86+PTX" "" arch ${arch})
-    list(APPEND MODIFIED_CUDA_ARCH_LIST ${arch})
-endforeach()
+#foreach(arch ${CUDA_ARCH_LIST})
+#    string(REPLACE "86+PTX" "" arch ${arch})
+#    list(APPEND MODIFIED_CUDA_ARCH_LIST ${arch})
+#endforeach()
 
-SET(CMAKE_CUDA_ARCHITECTURES ${MODIFIED_CUDA_ARCH_LIST})
-set_property(GLOBAL PROPERTY CUDA_ARCHITECTURES "${MODIFIED_CUDA_ARCH_LIST}")
+SET(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_LIST})
+set_property(GLOBAL PROPERTY CUDA_ARCHITECTURES "${CUDA_ARCH_LIST}")
 
 # Select NVCC architecture flags automatically
 cuda_select_nvcc_arch_flags(ARCH_FLAGS Auto)
@@ -64,17 +67,31 @@ target_link_libraries(project wb)
 ###############
 # project parallel
 ###############
-find_package(OpenMP REQUIRED)
+#find_package(OpenMP REQUIRED)
 
 include_directories(include)
 
 add_executable(project_par
         src/main.cpp
-        src/histogram_eq_par.cu
+        src/histogram_eq_par.cpp
 )
 
 target_link_libraries(project_par PUBLIC OpenMP::OpenMP_CXX wb)
 #target_compile_options(project_par PRIVATE -O2 -ftree-vectorize -fopt-info-vec-optimized)
+
+
+###############
+# project parallel cuda
+###############
+
+include_directories(include)
+
+add_executable(project_par_cuda
+        src/main.cpp
+        src/histogram_eq_par_cuda.cu
+)
+
+target_link_libraries(project_par_cuda wb)
 
 ##############################################################
 # Tests

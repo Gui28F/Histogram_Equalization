@@ -25,7 +25,7 @@ def plot_execution_times():
     plt.plot(avg_times_sorted.keys(), avg_times_sorted.values(), marker='o', color='skyblue', linewidth=2, markersize=8)
     plt.xlabel('Number of Threads')
     plt.ylabel('Speedup')
-    plt.title('Average Execution Time for Each Number of Threads')
+    plt.title('Speedup for Each Number of Threads')
     plt.grid(True)
     plt.show()
 
@@ -42,3 +42,4 @@ def box_plot():
     plt.show()
 
 plot_execution_times()
+#box_plot()

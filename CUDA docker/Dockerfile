@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
+FROM nvidia/cuda:12.4.1-base-ubuntu22.04
 
 ########################################################
 # Essential packages for remote debugging and login in
