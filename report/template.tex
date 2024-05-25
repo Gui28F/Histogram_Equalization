@@ -72,7 +72,7 @@ not so computational heavy functions.
  To reduce the impact on processing time caused by these functions within the algorithm, we integrated OpenMP directives into these specific parts of the code to accelerate computation. Prior to this optimization, we structured the code by creating separate functions for each step of the algorithm to maintain organization.
  
  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
+ each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3 getting the \texttt{CHUNK\_SIZE}. Now we will have the work that will be balanced between threads.
  
 \subsection{\textbf{Function parallelization}}
 
@@ -128,70 +128,37 @@ the OpenMP directives.
 \section{Metric Analysis}
 Now, let's assess the impact of these changes on the runtime of our program. For that we will use \textbf{speed up} and \textbf{efficienty} and we will execute every executing multiple times in order to get the mean value of the execution times.
 
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
+The code was executed on a computer with the following specifications: \textbf{Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz}
+with a base speed of \textbf{2,59 GHz} and with \textbf{6 cores} and \textbf{12 logical processors}. The code was executed in a docker container.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{images/speedup.png}
-  \caption{1907 Franklin Model D roadster. Photograph by Harris \&
-    Ewing, Inc. [Public domain], via Wikimedia
-    Commons. (\url{https://goo.gl/VLCRBB}).}
-  \Description{A woman and a girl in white dresses sit in an open car.}
+  \includegraphics[width=\linewidth]{images/time\_distribution.png}
+  \caption{Breakdown of the distribution of execution time across different number of threads usage}
+  \Description{Breakdown of the distribution of execution time across different number of thread usage}
+  \label{fig1}
 \end{figure}
 
-Your figures should contain a caption which describes the figure to
-the reader.
- It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
-  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
-  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
-  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
-  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
-  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3. Now we will have the work that will be balanced between threads.
+We can clearly observe that the execution time is always getting lower until it hits a certain point where it spikes again. The best \texttt{NR\_THREADS} would be 11. Since the outlier is not as distant as with 12 threads it would be a better choice.
 
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/speedup2.png}
+  \caption{Speedup across different number of threads usage}
+  \Description{Breakdown of the distribution of execution time across different number of thread usage}
+\end{figure}
 
-\subsection{\textbf{Q\&A}}
-\texttt{TODO} Questions to ask the teacher.
+In this graphic we can observe a very related behaviour to Figure \ref{fig1} where the speed up keeps getting better until a certain point where it stops to increase and de-creases. Again we can observe that the best \texttt{NR\_THREADS} would be 11.
+
+In order to calculate the efficiency we will use the best result that we had: the one with 11 threads. For that we define $S_{11}$ which is the speed up with 11 threads and it will be equal to $$S_{11}=6.5$$
+
+And the efficiency of the parallelel implementation in Section 1 get's us an efficiency value of: $$E_{11} = \frac{S_{11}}{11} = 59\%$$
+
+\section{Future Work}
+Now after applying the changes with OpenMP in our code we will enter in the realm of GPU computing. By using CUDA we will be able to do some computation in parallel in the GPU and send the results back to the CPU in order to accelerate even more our computation. We will have to do an analysis to see what is worth to parallelize and what is not.
+
+\section{Code}
+All the code mentioned above can be consulted in \url{https://github.com/Gui28F/CP-Project} in the following commit ID \texttt{6a20ac8}. 
 \bibliographystyle{acm}
 \bibliography{refs}
 
