@@ -35,15 +35,6 @@ namespace cp {
     void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
-        int counter = 0;
-        /*std::ofstream outputfile;
-
-        outputfile.open("open.txt");
-
-        if(!outputfile) {
-            std::cerr << "Error opening file!" << std::endl;
-            exit(1);
-        }*/
 
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
@@ -51,17 +42,9 @@ namespace cp {
                 auto g = uchar_image[3 * i + 1];
                 auto b = uchar_image[3 * i + 2];
                 gray_image[i] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
-
-
-
-                //std::printf("%hhu\n", gray_image[i]);
-                //outputfile << static_cast<unsigned int>(gray_image[i]) << std::endl;
-
                 histogram[gray_image[i]]++;
 
         }
-        //exit(1);
-
     }
 
    /* void fill_histogram(int (&histogram)[256], const int size, const std::shared_ptr<unsigned char[]> &gray_image,int chunk_size) {
@@ -92,7 +75,6 @@ namespace cp {
             uchar_image[i] = correct_color(cdf[uchar_image[i]], cdf_min);
             output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
         }
-        //exit(1);
     }
 
 
@@ -111,63 +93,15 @@ namespace cp {
         const auto chunk_size = size / n_threads;
         const auto chunk_size_channels = size_channels / n_threads;
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
-        std::ofstream outputfile;
 
-        outputfile.open("open.txt");
-
-         /*outputfile.open("open.txt");
-         for(int i = 0; i < size_channels; i++)
-         {
-             outputfile << static_cast<unsigned int>(uchar_image[i]) << std::endl;
-             printf("%hhu\n", uchar_image[i]);
-         }
-         exit(1);*/
-        //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
-
-
-        /*int counter = 0;
-        for(int i = 0; i <HISTOGRAM_LENGTH; i++) {
-            printf("%d\n", histogram[i]);
-            counter++;
-        }
-        printf("%d\n",counter);
-        printf("\n");
-        exit(1);*/
-
-
-
-        //fill_histogram(histogram, size, gray_image, chunk_size);
 
         calculate_cdf(cdf, histogram,size);
 
         auto cdf_min = cdf[0];
-        //printf("cdf_min: %f\n", cdf_min);
-        //exit(1);
-        //cdf_min_loop(cdf_min, cdf);
-        /*
-        int counter = 0;
-        for(float i : cdf) {
-            printf("%f\n", i);
-            counter++;
-        }
-        printf("%d\n",counter);
-        printf("\n");
-        exit(1);
-        */
 
         correct_color_loop_and_rescale(size_channels, uchar_image, cdf, cdf_min, output_image_data, chunk_size_channels);
 
-        /*
-        for(int i = 0; i < size_channels; i++)
-        {
-            outputfile << (output_image_data[i]) << std::endl;
-            printf("%f\n", uchar_image[i]);
-        }
-        exit(1);
-        */
-
-        //rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
     }
 
     wbImage_t par_iterative_histogram_equalization(wbImage_t &input_image, int iterations, int num_threads) {
