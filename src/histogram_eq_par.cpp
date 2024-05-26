@@ -36,14 +36,14 @@ namespace cp {
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
         int counter = 0;
-        std::ofstream outputfile;
+        /*std::ofstream outputfile;
 
         outputfile.open("open.txt");
 
         if(!outputfile) {
             std::cerr << "Error opening file!" << std::endl;
             exit(1);
-        }
+        }*/
 
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
@@ -85,12 +85,14 @@ namespace cp {
 
     void correct_color_loop_and_rescale(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image, float (&cdf)[256],
                        float cdf_min, float *output_image_data, int chunk_size_channels) {
+
         #pragma omp parallel for schedule(static, chunk_size_channels) num_threads(n_threads)
         for (int i = 0; i < size_channels; i++)
         {
             uchar_image[i] = correct_color(cdf[uchar_image[i]], cdf_min);
             output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
         }
+        //exit(1);
     }
 
 /*void rescale(const int size_channels, float *output_image_data, const std::shared_ptr<unsigned char[]> &uchar_image,int chunk_size_channels) {
@@ -116,16 +118,16 @@ namespace cp {
         //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
 
-        /**
-        int counter = 0;
+
+        /*int counter = 0;
         for(int i = 0; i <HISTOGRAM_LENGTH; i++) {
             printf("%d\n", histogram[i]);
             counter++;
         }
         printf("%d\n",counter);
         printf("\n");
-        exit(1);
-         */
+        exit(1);*/
+
 
 
         //fill_histogram(histogram, size, gray_image, chunk_size);
@@ -133,10 +135,27 @@ namespace cp {
         calculate_cdf(cdf, histogram,size);
 
         auto cdf_min = cdf[0];
-        std::printf("%f\n",cdf[255]);
+        printf("cdf_min: %f\n", cdf_min);
         //cdf_min_loop(cdf_min, cdf);
+        /*int counter = 0;
+        for(float i : cdf) {
+            printf("%f\n", i);
+            counter++;
+        }
+        printf("%d\n",counter);
+        printf("\n");
+        exit(1);*/
 
         correct_color_loop_and_rescale(size_channels, uchar_image, cdf, cdf_min, output_image_data, chunk_size_channels);
+        std::ofstream outputfile;
+
+        outputfile.open("open.txt");
+        for(int i = 0; i < size_channels; i++)
+        {
+            outputfile << static_cast<unsigned int>(uchar_image[i]) << std::endl;
+            printf("%hhu\n", uchar_image[i]);
+        }
+        exit(1);
         //rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
     }
 

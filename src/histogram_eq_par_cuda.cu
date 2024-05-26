@@ -18,7 +18,7 @@ namespace cp {
             uchar_image[idx] = (unsigned char)(255.0f * input_image_data[idx]);
         }
     }
-    __global__ void extractGrayScale_kernel(int width, int height, const unsigned char* uchar_image, unsigned char* gray_image) {
+    __global__ void extractGrayScale_kernel(int width, int height, const unsigned char* uchar_image, unsigned char* gray_image, unsigned int* histogram) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -29,11 +29,13 @@ namespace cp {
             auto r = uchar_image[rgbIdx];
             auto g = uchar_image[rgbIdx + 1];
             auto b = uchar_image[rgbIdx + 2];
-            gray_image[ii * width + jj] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
+            int idx =ii * width + jj;
+            gray_image[idx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
+            atomicAdd(&histogram[gray_image[idx]], 1);
         }
     }
 
-    __global__ void calculateProb_Kernel( const int* histogram, float* probabilities, int size) {
+    __global__ void calculateProb_Kernel( const unsigned int* histogram, float* probabilities, int size) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         if (idx < HISTOGRAM_LENGTH) {
             // This is what the probability function call does
@@ -61,11 +63,11 @@ namespace cp {
 
         // Check if idx is within bounds
         if (ii < height*3 && jj < width*3) {
-            float cdf_min = d_cdf[0];
+
             auto cdf_val = d_cdf[uchar_image[idx]];
-            auto a_temp = static_cast<unsigned char>(255.0f * (cdf_val - cdf_min) / (1 - cdf_min));
-            auto a_clamp = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
-            uchar_image[idx] = a_clamp;
+            float cdf_min = d_cdf[0];
+            auto a_temp = static_cast<unsigned char>((255.0f * (cdf_val - cdf_min)) / (1 - cdf_min));
+            uchar_image[idx] = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
         }
     }
 
@@ -74,14 +76,14 @@ namespace cp {
                             float *d_output_image_data,
                             unsigned char *d_uchar_image,
                             unsigned char *d_gray_image,
-                            int *d_histogram,
+                            unsigned int *d_histogram,
                             float *d_cdf) {
         int size = width * height;
         dim3 dimBlock(TILE_WIDTH, TILE_WIDTH);
-        dim3 dimGrid((width*3 - 1) / TILE_WIDTH + 1, (height*3 - 1) / TILE_WIDTH + 1);
-        normalize_kernel<<<dimGrid, dimBlock>>>(width, size_channels, d_uchar_image, d_input_image_data); // OK
+        dim3 dimGrid((int)ceil(width*3 / TILE_WIDTH ), (int)ceil(height*3 / TILE_WIDTH));
+        normalize_kernel<<<dimGrid, dimBlock>>>(width, height, d_uchar_image, d_input_image_data); // OK
         cudaDeviceSynchronize();
-        extractGrayScale_kernel<<<dimGrid, dimBlock>>>(width, height,d_uchar_image, d_gray_image); // OK
+        extractGrayScale_kernel<<<dimGrid, dimBlock>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
         cudaDeviceSynchronize();
 
         std::ofstream outputfile;
@@ -94,8 +96,8 @@ namespace cp {
         }
 
 
-        /**
-        unsigned  char *h;
+
+        /*unsigned  char *h;
         h = (unsigned  char *)malloc(size * sizeof(unsigned char));
         cudaMemcpy(h, d_gray_image, size * sizeof(unsigned char), cudaMemcpyDeviceToHost);
         unsigned  char max;
@@ -108,32 +110,32 @@ namespace cp {
         printf("The max value is %hhu\n", max);
         free(h);
 
-        exit(1);
-         */
+        exit(1);*/
+
 
 
         void* d_temp_storage = NULL;
         size_t temp_storage_bytes = 0;
-        cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
+        /*cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
-        cudaFree(d_temp_storage);
+        cudaFree(d_temp_storage);*/
         cudaDeviceSynchronize();
 
-        /**
-        int *h;
-        h = (int*)malloc(HISTOGRAM_LENGTH * sizeof(int));
-        cudaMemcpy(h, d_histogram, HISTOGRAM_LENGTH * sizeof(int), cudaMemcpyDeviceToHost);
-        int max;
+
+        /*unsigned int *h;
+        h = (unsigned int*)malloc(HISTOGRAM_LENGTH * sizeof(unsigned int));
+        cudaMemcpy(h, d_histogram, HISTOGRAM_LENGTH * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+        unsigned int max;
         for(int i = 0; i <256; i++) {
             if (h[i] > max)
                 max = h[i];
-            printf("%hhu\n", h[i]);
+            printf("%d\n", h[i]);
         }
         printf("The max value is %hhu\n", max);
         free(h);
-        exit(1);
-        */
+        exit(1);*/
+
 
         int blockSize = 256;
         int numBlocks = (HISTOGRAM_LENGTH + blockSize - 1) / blockSize;
@@ -146,11 +148,35 @@ namespace cp {
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
         cudaFree(d_temp_storage);
-        cudaDeviceSynchronize();
+        cudaDeviceSynchronize();//ok
 
-        //auto cdf_min = d_cdf[0]; This crashed for some reason
+        /*float *h;
+       h = (float*)malloc(HISTOGRAM_LENGTH * sizeof(float));
+       cudaMemcpy(h, d_cdf, HISTOGRAM_LENGTH * sizeof(float), cudaMemcpyDeviceToHost);
+        float max;
+       for(int i = 0; i <256; i++) {
+           if (h[i] > max)
+               max = h[i];
+           printf("%f\n", h[i]);
+       }
+       printf("The max value is %f\n", max);
+       free(h);
+       exit(1);*/
         correct_kernel<<<dimGrid, dimBlock>>>(width, height, d_cdf, d_uchar_image);
         cudaDeviceSynchronize();
+        unsigned  char *h;
+        h = (unsigned  char *)malloc(size_channels * sizeof(unsigned char));
+        cudaMemcpy(h, d_uchar_image, size_channels * sizeof(unsigned char), cudaMemcpyDeviceToHost);
+        unsigned  char max;
+        for(int i = 0; i <size_channels; i++) {
+            if (h[i] > max)
+                max = h[i];
+            outputfile << static_cast<unsigned int>(h[i]) << std::endl;
+            printf("%hhu\n", h[i]);
+        }
+        printf("The max value is %hhu\n", max);
+        free(h);
+        exit(1);
 
         rescale_kernel<<<dimGrid, dimBlock>>>(width, height, d_output_image_data, d_uchar_image);
         cudaDeviceSynchronize();
@@ -166,7 +192,7 @@ namespace cp {
 
         float *host_input_image_data = wbImage_getData(input_image);
         wbImage_t outputImage = wbImage_new(width, height, channels);
-        float *host_output_image_data;
+        float *host_output_image_data = wbImage_getData(outputImage);
 
         float *d_input_image_data, *d_output_image_data;
         cudaMalloc(&d_input_image_data, width * height * channels * sizeof(float));
@@ -186,9 +212,11 @@ namespace cp {
         //int histogram[HISTOGRAM_LENGTH];
         //float cdf[HISTOGRAM_LENGTH];
 
-        int *d_histogram;
+        unsigned int *d_histogram;
         float *d_cdf;
-        cudaMalloc(&d_histogram, HISTOGRAM_LENGTH * sizeof(int));
+        cudaMalloc(&d_histogram, HISTOGRAM_LENGTH * sizeof(unsigned int));
+        cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
+
         cudaMalloc(&d_cdf, HISTOGRAM_LENGTH * sizeof(float));
 
         for (int i = 0; i < iterations; i++){
