@@ -95,11 +95,7 @@ namespace cp {
         //exit(1);
     }
 
-/*void rescale(const int size_channels, float *output_image_data, const std::shared_ptr<unsigned char[]> &uchar_image,int chunk_size_channels) {
-        #pragma omp parallel for schedule(dynamic, chunk_size_channels) num_threads(n_threads)
-            for (int i = 0; i < size_channels; i++)
-                output_image_data[i] = static_cast<float>(uchar_image[i]) / 255.0f;
-    }*/
+
 
     static void histogram_equalization(const int width, const int height,
                                        const float *input_image_data,
