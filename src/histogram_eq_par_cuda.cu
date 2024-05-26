@@ -8,7 +8,7 @@
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
 
-    __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data) {
+    __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image, unsigned int* histogram) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
         int idx = (ii * width + jj)*3; // This was the fix for the last image
@@ -17,6 +17,13 @@ namespace cp {
         if (ii < height && jj < width) {
             for(int i = 0; i < 3; i++)
                 uchar_image[idx+i] = (unsigned char)(255.0f * input_image_data[idx+i]);
+
+            auto r = uchar_image[idx];
+            auto g = uchar_image[idx + 1];
+            auto b = uchar_image[idx + 2];
+            idx =ii * width + jj;
+            gray_image[idx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
+            atomicAdd(&histogram[gray_image[idx]], 1);
         }
     }
     __global__ void extractGrayScale_kernel(int width, int height, const unsigned char* uchar_image, unsigned char* gray_image, unsigned int* histogram) {
@@ -45,7 +52,7 @@ namespace cp {
     }
 
     // LMAO?
-    __global__ void correct_kernel(int width, int height, const float *d_cdf, unsigned char *uchar_image) {
+    __global__ void correct_kernel(int width, int height, const float *d_cdf, unsigned char *uchar_image,float *output_image_data) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
         int idx = (ii * width + jj)*3;
@@ -59,6 +66,8 @@ namespace cp {
                 auto a_temp = static_cast<unsigned char>((255 * (cdf_val - cdf_min)) / (1 - cdf_min));
 
                 uchar_image[idx+i] = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
+
+                output_image_data[idx+i] = static_cast<float>(uchar_image[idx+i]) / 255.0f;
             }
         }
     }
@@ -88,12 +97,13 @@ namespace cp {
         int size = width * height;
         dim3 dimBlock2(TILE_WIDTH, TILE_WIDTH);
         dim3 dimGrid2((width + TILE_WIDTH- 1) / TILE_WIDTH, (height + TILE_WIDTH- 1) / TILE_WIDTH );
-        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_uchar_image, d_input_image_data); // OK
-        cudaDeviceSynchronize();
 
         cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
-        extractGrayScale_kernel<<<dimGrid2, dimBlock2>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
-        cudaDeviceSynchronize();
+        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_uchar_image, d_input_image_data, d_gray_image, d_histogram); // OK
+        //cudaDeviceSynchronize();
+
+        /*extractGrayScale_kernel<<<dimGrid2, dimBlock2>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
+        cudaDeviceSynchronize();*/
 
         std::ofstream outputfile;
 
@@ -121,7 +131,7 @@ namespace cp {
         int blockSize = 256;
         int numBlocks = (HISTOGRAM_LENGTH + blockSize - 1) / blockSize;
         calculateProb_Kernel<<<numBlocks, blockSize>>>(d_histogram, d_cdf, size);
-        cudaDeviceSynchronize();
+        //cudaDeviceSynchronize();
 
         d_temp_storage = nullptr;
         temp_storage_bytes = 0;
@@ -129,13 +139,13 @@ namespace cp {
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
         cudaFree(d_temp_storage);
-        cudaDeviceSynchronize();//ok
+        //cudaDeviceSynchronize();//ok
 
-        correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image);
-        cudaDeviceSynchronize(); // OK
+        correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image, d_output_image_data);
+        //cudaDeviceSynchronize(); // OK
 
-        rescale_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_output_image_data, d_uchar_image);
-        cudaDeviceSynchronize();
+        /*rescale_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_output_image_data, d_uchar_image);
+        cudaDeviceSynchronize();*/
 
 
 
