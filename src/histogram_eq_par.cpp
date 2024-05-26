@@ -115,6 +115,15 @@ namespace cp {
         const auto chunk_size = size / n_threads;
         const auto chunk_size_channels = size_channels / n_threads;
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
+        std::ofstream outputfile;
+
+         /*outputfile.open("open.txt");
+         for(int i = 0; i < size_channels; i++)
+         {
+             outputfile << static_cast<unsigned int>(uchar_image[i]) << std::endl;
+             printf("%hhu\n", uchar_image[i]);
+         }
+         exit(1);*/
         //rgb2gray(height, width, uchar_image, gray_image, histogram, size, chunk_size);
         extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
 
@@ -147,9 +156,7 @@ namespace cp {
         exit(1);*/
 
         correct_color_loop_and_rescale(size_channels, uchar_image, cdf, cdf_min, output_image_data, chunk_size_channels);
-        std::ofstream outputfile;
 
-        outputfile.open("open.txt");
         for(int i = 0; i < size_channels; i++)
         {
             outputfile << static_cast<unsigned int>(uchar_image[i]) << std::endl;
