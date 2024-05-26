@@ -117,6 +117,8 @@ namespace cp {
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
         std::ofstream outputfile;
 
+        outputfile.open("open.txt");
+
          /*outputfile.open("open.txt");
          for(int i = 0; i < size_channels; i++)
          {
@@ -144,25 +146,31 @@ namespace cp {
         calculate_cdf(cdf, histogram,size);
 
         auto cdf_min = cdf[0];
-        printf("cdf_min: %f\n", cdf_min);
+        //printf("cdf_min: %f\n", cdf_min);
+        //exit(1);
         //cdf_min_loop(cdf_min, cdf);
-        /*int counter = 0;
+        /*
+        int counter = 0;
         for(float i : cdf) {
             printf("%f\n", i);
             counter++;
         }
         printf("%d\n",counter);
         printf("\n");
-        exit(1);*/
+        exit(1);
+        */
 
         correct_color_loop_and_rescale(size_channels, uchar_image, cdf, cdf_min, output_image_data, chunk_size_channels);
 
+        /*
         for(int i = 0; i < size_channels; i++)
         {
-            outputfile << static_cast<unsigned int>(uchar_image[i]) << std::endl;
-            printf("%hhu\n", uchar_image[i]);
+            outputfile << (output_image_data[i]) << std::endl;
+            printf("%f\n", uchar_image[i]);
         }
         exit(1);
+        */
+
         //rescale(size_channels, output_image_data, uchar_image, chunk_size_channels);
     }
 

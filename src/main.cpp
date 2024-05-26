@@ -9,9 +9,10 @@ int main(int argc, char **argv) {
         return 1;
     }
     int n_iterations = static_cast<int>(std::strtol(argv[2], nullptr, 10));
-    constexpr int num_threads = 20;
-
-    constexpr int num_executions = 10;
+    //constexpr int num_threads = 20;
+    constexpr int num_threads = 1;
+    //constexpr int num_executions = 10;
+    constexpr int num_executions = 1;
     // Array to store execution times for each thread and each iteration
     double execution_times[num_threads][num_executions] = {0}; // Assuming at most 10 iterations
     // Repeat for each number of threads

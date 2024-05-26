@@ -43,29 +43,35 @@ namespace cp {
         }
     }
 
+    // LMAO?
     __global__ void correct_kernel(int width, int height, const float *d_cdf, unsigned char *uchar_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
-        int idx = ii * width + jj;
+        int idx = (ii * width + jj)*3;
 
         // Check if idx is within bounds
-        if (ii < height*3 && jj < width*3) {
+        if (ii < height && jj < width) {
+            for (int i = 0; i < 3; i++) {
+                auto cdf_val = d_cdf[uchar_image[idx+i]];
+                float cdf_min = d_cdf[0];
 
-            auto cdf_val = d_cdf[uchar_image[idx]];
-            float cdf_min = d_cdf[0];
-            auto a_temp = static_cast<unsigned char>((255.0f * (cdf_val - cdf_min)) / (1 - cdf_min));
-            uchar_image[idx] = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
+                auto a_temp = static_cast<unsigned char>((255 * (cdf_val - cdf_min)) / (1 - cdf_min));
+
+                uchar_image[idx+i] = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
+            }
         }
     }
 
     __global__ void rescale_kernel(int width, int height, float *output_image_data, const unsigned char *uchar_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
-        int idx = ii * width + jj;
+        int idx = (ii * width + jj)*3;
 
         // Check if idx is within bounds
-        if (ii < height*3 && jj < width*3) {
-            output_image_data[idx] = static_cast<float>(uchar_image[idx]) / 255.0f;
+        if (ii < height && jj < width) {
+            for(int i = 0; i < 3; i++) {
+                output_image_data[idx+i] = static_cast<float>(uchar_image[idx+i]) / 255.0f;
+            }
         }
     }
 
@@ -82,6 +88,7 @@ namespace cp {
         dim3 dimGrid((width*3 - 1) / TILE_WIDTH + 1, (height*3 - 1) / TILE_WIDTH + 1);
         normalize_kernel<<<dimGrid, dimBlock>>>(width, height, d_uchar_image, d_input_image_data); // OK
         cudaDeviceSynchronize();
+        cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
         extractGrayScale_kernel<<<dimGrid, dimBlock>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
         cudaDeviceSynchronize();
 
@@ -132,20 +139,24 @@ namespace cp {
         cudaFree(d_temp_storage);
         cudaDeviceSynchronize();//ok
 
-        /*float *h;
-       h = (float*)malloc(HISTOGRAM_LENGTH * sizeof(float));
-       cudaMemcpy(h, d_cdf, HISTOGRAM_LENGTH * sizeof(float), cudaMemcpyDeviceToHost);
+        /*
+        float *h;
+        h = (float*)malloc(HISTOGRAM_LENGTH * sizeof(float));
+        cudaMemcpy(h, d_cdf, HISTOGRAM_LENGTH * sizeof(float), cudaMemcpyDeviceToHost);
         float max;
-       for(int i = 0; i <256; i++) {
+        for(int i = 0; i <256; i++) {
            if (h[i] > max)
                max = h[i];
            printf("%f\n", h[i]);
-       }
-       printf("The max value is %f\n", max);
-       free(h);
-       exit(1);*/
-        correct_kernel<<<dimGrid, dimBlock>>>(width, height, d_cdf, d_uchar_image);
-        cudaDeviceSynchronize();
+        }
+        printf("The max value is %f\n", max);
+        free(h);
+        exit(1);
+         */
+        dim3 dimBlock2(TILE_WIDTH, TILE_WIDTH);
+        dim3 dimGrid2((width + TILE_WIDTH- 1) / TILE_WIDTH, (height + TILE_WIDTH- 1) / TILE_WIDTH );
+        correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image);
+        cudaDeviceSynchronize(); // OK
 
        /*unsigned  char *h;
         h = (unsigned  char *)malloc(size_channels * sizeof(unsigned char));
@@ -161,8 +172,25 @@ namespace cp {
         free(h);
 
         exit(1);*/
-        rescale_kernel<<<dimGrid, dimBlock>>>(width, height, d_output_image_data, d_uchar_image);
+
+        rescale_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_output_image_data, d_uchar_image);
         cudaDeviceSynchronize();
+        /*
+        float *h;
+       h = (float *)malloc(size_channels * sizeof(float));
+       cudaMemcpy(h, d_output_image_data, size_channels * sizeof(float), cudaMemcpyDeviceToHost);
+       float max;
+       for(int i = 0; i <size_channels; i++) {
+           if (h[i] > max)
+               max = h[i];
+           printf("%f\n", h[i]);
+           outputfile << (h[i]) << std::endl;
+       }
+       printf("The max value is %f\n", max);
+       free(h);
+        */
+       //exit(1);
+
 
     }
 
@@ -183,8 +211,8 @@ namespace cp {
         cudaMemcpy(d_input_image_data, host_input_image_data, width * height * channels * sizeof(float), cudaMemcpyHostToDevice);
         //cudaMemcpy(d_output_image_data, host_output_image_data, width * height * channels * sizeof(float), cudaMemcpyHostToDevice);
 
-        std::shared_ptr<unsigned char[]> host_uchar_image(new unsigned char[size_channels]);
-        std::shared_ptr<unsigned char[]> host_gray_image(new unsigned char[size]);
+        //std::shared_ptr<unsigned char[]> host_uchar_image(new unsigned char[size_channels]);
+        //std::shared_ptr<unsigned char[]> host_gray_image(new unsigned char[size]);
 
         unsigned char *d_uchar_image, *d_gray_image;
         cudaMalloc(&d_uchar_image, size_channels * sizeof(unsigned char));
@@ -198,7 +226,7 @@ namespace cp {
         unsigned int *d_histogram;
         float *d_cdf;
         cudaMalloc(&d_histogram, HISTOGRAM_LENGTH * sizeof(unsigned int));
-        cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
+
 
         cudaMalloc(&d_cdf, HISTOGRAM_LENGTH * sizeof(float));
 
@@ -208,7 +236,8 @@ namespace cp {
                                    d_uchar_image, d_gray_image,
                                    d_histogram, d_cdf);
 
-            d_input_image_data = d_output_image_data;
+           // d_input_image_data = d_output_image_data;
+            cudaMemcpy(d_input_image_data, d_output_image_data, size_channels*sizeof(float), cudaMemcpyDeviceToDevice);
         }
         cudaMemcpy(host_output_image_data, d_output_image_data, width * height * channels * sizeof(float), cudaMemcpyDeviceToHost);
         cudaFree(d_input_image_data);
