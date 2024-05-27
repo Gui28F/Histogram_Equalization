@@ -7,15 +7,6 @@
 
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
-    int size_g =  0;
-    struct CustomScan
-    {
-        template <typename T>
-        CUB_RUNTIME_FUNCTION __forceinline__
-        T operator()(const T &a, const T &b) const {
-            return a + b/size_g ;
-        }
-    };
 
     __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
@@ -124,8 +115,7 @@ namespace cp {
         cudaFree(d_temp_storage);
         //cudaDeviceSynchronize();
 
-
-        /*int blockSize = 256;
+        int blockSize = 256;
         int numBlocks = (HISTOGRAM_LENGTH + blockSize - 1) / blockSize;
         calculateProb_Kernel<<<numBlocks, blockSize>>>(d_histogram, d_cdf, size);
         //cudaDeviceSynchronize();
@@ -136,14 +126,7 @@ namespace cp {
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
         cudaFree(d_temp_storage);
-        //cudaDeviceSynchronize();//ok*/
-        d_temp_storage = nullptr;
-        temp_storage_bytes = 0;
-        CustomScan scan_op;
-        cub::DeviceScan::InclusiveScan(d_temp_storage, temp_storage_bytes,d_histogram, d_cdf, scan_op, HISTOGRAM_LENGTH);
-        cudaMalloc(&d_temp_storage, temp_storage_bytes);
-        cub::DeviceScan::InclusiveScan(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, scan_op,HISTOGRAM_LENGTH);
-        cudaFree(d_temp_storage);
+        //cudaDeviceSynchronize();//ok
 
         correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image, d_output_image_data);
         //cudaDeviceSynchronize(); // OK
@@ -158,7 +141,6 @@ namespace cp {
         const int height = wbImage_getHeight(input_image);
         const int channels = wbImage_getChannels(input_image);
         const auto size = width * height;
-        size_g = size;
         const auto size_channels = size * channels;
 
         float *host_input_image_data = wbImage_getData(input_image);

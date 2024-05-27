@@ -1,45 +1,37 @@
 import matplotlib.pyplot as plt
+import os
 
-execution_times = {}
+def read_execution_times(file_name):
+    execution_times = {}
+    with open(file_name, 'r') as file:
+        for line in file:
+            parts = line.strip().split(": ")
+            thread_label = parts[0]
+            times = list(map(float, parts[1].split(",")))
+            execution_times[thread_label] = times
+    return execution_times
 
-# Read the data from the file
-with open("execution_times.txt", 'r') as file:
-    for line in file:
-        parts = line.strip().split(": ")
-        thread_label = parts[0]
-        times = list(map(float, parts[1].split(",")))
-        execution_times[thread_label] = times
-
-
-
-def plot_execution_times():
-    seq_time = (sum(execution_times["1"]) / len(execution_times["1"]))
-    # Calculate average execution time for each thread
-    avg_times = {thread_label: seq_time/(sum(times) / len(times)) for thread_label, times in execution_times.items()}
-
-    # Sort the dictionary by thread label
+def calculate_speedup(execution_times):
+    seq_time = sum(execution_times["1"]) / len(execution_times["1"])
+    avg_times = {thread_label: seq_time / (sum(times) / len(times)) for thread_label, times in execution_times.items()}
     avg_times_sorted = dict(sorted(avg_times.items(), key=lambda item: int(item[0][6:]) if item[0][6:].isdigit() else 0))
+    return avg_times_sorted
 
+def plot_execution_times(files):
+    plt.figure(figsize=(10, 6))
 
-# Plot the data
-    plt.plot(avg_times_sorted.keys(), avg_times_sorted.values(), marker='o', color='skyblue', linewidth=2, markersize=8)
+    for file_name in files:
+        execution_times = read_execution_times(file_name)
+        speedup = calculate_speedup(execution_times)
+        plt.plot(list(speedup.keys()), list(speedup.values()), marker='o', linewidth=2, markersize=8, label=os.path.basename(file_name.split(".")[0]))
+
     plt.xlabel('Number of Threads')
     plt.ylabel('Speedup')
     plt.title('Speedup for Each Number of Threads')
+    plt.legend()
     plt.grid(True)
     plt.show()
 
-"""
-def box_plot():
-    thread_times = [execution_times[thread_label] for thread_label in sorted(execution_times.keys(), key=lambda x: int(x))]
-
-    # Create a box plot for each thread's execution times
-    plt.boxplot(thread_times, labels=sorted(execution_times.keys(), key=lambda x: int(x)))
-    plt.xlabel('Number of Threads')
-    plt.ylabel('Execution Time (ms)')
-    plt.title('Execution Times for Each Number of Threads')
-    plt.grid(True)
-    plt.show()
-"""
-plot_execution_times()
-#box_plot()
+# Example usage with a list of file names
+files = ["borabora_1.txt", "input01.txt", "sample_5184×3456.txt"]
+plot_execution_times(files)
