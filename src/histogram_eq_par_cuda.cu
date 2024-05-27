@@ -7,8 +7,17 @@
 
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
+    int size_g =  0;
+    struct CustomScan
+    {
+        template <typename T>
+        CUB_RUNTIME_FUNCTION __forceinline__
+        T operator()(const T &a, const T &b) const {
+            return a + b/size_g ;
+        }
+    };
 
-    __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image, unsigned int* histogram) {
+    __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
         int idx = (ii * width + jj)*3; // This was the fix for the last image
@@ -23,10 +32,10 @@ namespace cp {
             auto b = uchar_image[idx + 2];
             idx =ii * width + jj;
             gray_image[idx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
-            atomicAdd(&histogram[gray_image[idx]], 1);
+           // atomicAdd(&histogram[gray_image[idx]], 1);
         }
     }
-    __global__ void extractGrayScale_kernel(int width, int height, const unsigned char* uchar_image, unsigned char* gray_image, unsigned int* histogram) {
+   /* __global__ void extractGrayScale_kernel(int width, int height, const unsigned char* uchar_image, unsigned char* gray_image, unsigned int* histogram) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -41,7 +50,7 @@ namespace cp {
             gray_image[idx] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
             atomicAdd(&histogram[gray_image[idx]], 1);
         }
-    }
+    }*/
 
     __global__ void calculateProb_Kernel( const unsigned int* histogram, float* probabilities, int size) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -65,14 +74,14 @@ namespace cp {
 
                 auto a_temp = static_cast<unsigned char>((255 * (cdf_val - cdf_min)) / (1 - cdf_min));
 
-                uchar_image[idx+i] = min(max(a_temp, static_cast<unsigned char>(0)), static_cast<unsigned char>(255));
+                uchar_image[idx+i] = min(max(a_temp, 0), 255);
 
                 output_image_data[idx+i] = static_cast<float>(uchar_image[idx+i]) / 255.0f;
             }
         }
     }
 
-    __global__ void rescale_kernel(int width, int height, float *output_image_data, const unsigned char *uchar_image) {
+   /* __global__ void rescale_kernel(int width, int height, float *output_image_data, const unsigned char *uchar_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
         int idx = (ii * width + jj)*3;
@@ -83,7 +92,7 @@ namespace cp {
                 output_image_data[idx+i] = static_cast<float>(uchar_image[idx+i]) / 255.0f;
             }
         }
-    }
+    }*/
 
 
     void histogram_equalization(int width,int height, int size_channels,
@@ -99,36 +108,24 @@ namespace cp {
         dim3 dimGrid2((width + TILE_WIDTH- 1) / TILE_WIDTH, (height + TILE_WIDTH- 1) / TILE_WIDTH );
 
         cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
-        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_uchar_image, d_input_image_data, d_gray_image, d_histogram); // OK
+        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_uchar_image, d_input_image_data, d_gray_image); // OK
         //cudaDeviceSynchronize();
 
         /*extractGrayScale_kernel<<<dimGrid2, dimBlock2>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
         cudaDeviceSynchronize();*/
 
-        std::ofstream outputfile;
-
-        outputfile.open("cuda.txt");
-
-        if(!outputfile) {
-            std::cerr << "Error opening file!" << std::endl;
-            exit(1);
-        }
 
 
-
-        void* d_temp_storage = NULL;
+        void* d_temp_storage = nullptr;
         size_t temp_storage_bytes = 0;
-        /*cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
+        cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceHistogram::HistogramEven(d_temp_storage, temp_storage_bytes, d_gray_image, d_histogram, HISTOGRAM_LENGTH + 1, 0, HISTOGRAM_LENGTH, size);
-        cudaFree(d_temp_storage);*/
+        cudaFree(d_temp_storage);
         //cudaDeviceSynchronize();
 
 
-
-
-
-        int blockSize = 256;
+        /*int blockSize = 256;
         int numBlocks = (HISTOGRAM_LENGTH + blockSize - 1) / blockSize;
         calculateProb_Kernel<<<numBlocks, blockSize>>>(d_histogram, d_cdf, size);
         //cudaDeviceSynchronize();
@@ -139,15 +136,20 @@ namespace cp {
         cudaMalloc(&d_temp_storage, temp_storage_bytes);
         cub::DeviceScan::InclusiveSum(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, HISTOGRAM_LENGTH);
         cudaFree(d_temp_storage);
-        //cudaDeviceSynchronize();//ok
+        //cudaDeviceSynchronize();//ok*/
+        d_temp_storage = nullptr;
+        temp_storage_bytes = 0;
+        CustomScan scan_op;
+        cub::DeviceScan::InclusiveScan(d_temp_storage, temp_storage_bytes,d_histogram, d_cdf, scan_op, HISTOGRAM_LENGTH);
+        cudaMalloc(&d_temp_storage, temp_storage_bytes);
+        cub::DeviceScan::InclusiveScan(d_temp_storage, temp_storage_bytes,d_cdf, d_cdf, scan_op,HISTOGRAM_LENGTH);
+        cudaFree(d_temp_storage);
 
         correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image, d_output_image_data);
         //cudaDeviceSynchronize(); // OK
 
         /*rescale_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_output_image_data, d_uchar_image);
         cudaDeviceSynchronize();*/
-
-
 
     }
 
@@ -156,6 +158,7 @@ namespace cp {
         const int height = wbImage_getHeight(input_image);
         const int channels = wbImage_getChannels(input_image);
         const auto size = width * height;
+        size_g = size;
         const auto size_channels = size * channels;
 
         float *host_input_image_data = wbImage_getData(input_image);

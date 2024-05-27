@@ -29,7 +29,7 @@ def plot_execution_times():
     plt.grid(True)
     plt.show()
 
-
+"""
 def box_plot():
     thread_times = [execution_times[thread_label] for thread_label in sorted(execution_times.keys(), key=lambda x: int(x))]
 
@@ -40,6 +40,6 @@ def box_plot():
     plt.title('Execution Times for Each Number of Threads')
     plt.grid(True)
     plt.show()
-
+"""
 plot_execution_times()
 #box_plot()
