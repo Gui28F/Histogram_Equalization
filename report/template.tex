@@ -208,11 +208,11 @@ Before proceeding to the second kernel, it's essential to calculate the histogra
 
 By using \texttt{\textbf{cub::DeviceHistogram::HistogramEven}} we are able to calculate the histogram in the GPU without making the kernel ourselves.
 
-After having the histogram we can calculate the probabilities in order to use them in another call to the \texttt{\textbf{CUB}} library. For that we create a second kernel. This one will differ from the first one in the \texttt{\textbf{numBlocks}} and \texttt{\textbf{blockSize}}. The \texttt{\textbf{numBlocks}} will be $256$. And the \texttt{\textbf{blockSize}} will be \texttt{(HISTOGRAM\_LENGTH + blockSize - 1) / blockSize}. (needs better explanation)
+After having the histogram we can calculate the probabilities in order to use them in another call to the \texttt{\textbf{CUB}} library. For that we create a second kernel, which will seem more clear why ahead. This one will differ from the first one in the \texttt{\textbf{numBlocks}} and \texttt{\textbf{blockSize}}. The \texttt{\textbf{numBlocks}} will be $256$ and the \texttt{\textbf{blockSize}} will be \texttt{(HISTOGRAM\_LEN+ blockSize-1) / blockSize}.
 
 Once we have computed this probability array, we can further utilize it in another function provided by the \texttt{\textbf{CUB}}  library.
 
-The \texttt{cub::DeviceScan::InclusiveSum} function facilitates the calculation of the final cumulative distribution function (CDF) values. This not only streamlines the programming process but also optimizes computation time, offering significant efficiency gains.
+The \texttt{\textbf{cub::DeviceScan::InclusiveSum}} function facilitates the calculation of the final cumulative distribution function (CDF) values. This not only streamlines the programming process but also optimizes computation time, offering significant efficiency gains. We used the \texttt{\textbf{InclusiveSum}} because it was not possible to use \texttt{\textbf{cub::DeviceScan::InclusiveScan}} due to restrictions in the library (there was no way to pass the probabilities to this call). That's why we must calculate the probabilities beforehand and use the \texttt{\textbf{InclusiveSum}}.
 
 Ultimately, we employ our final kernel, which could theoretically be executed within the first kernel. However, due to dependencies necessitating separate execution, we're compelled to create this third kernel to handle the last part of the algorithm. The code can be seen in Listing \ref{lst:last_func}.
 
