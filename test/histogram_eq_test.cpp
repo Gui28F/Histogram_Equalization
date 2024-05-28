@@ -10,7 +10,7 @@ TEST(HistogramEqOMP, Input01) {
 
     wbImage_t inputImage = wbImport(DATASET_FOLDER "input01.ppm");
     wbImage_t expectedOutputImage = seq_iterative_histogram_equalization(inputImage, 4);
-    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4);
+    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4,16);
     // check if the output image is correct
     ASSERT_EQ(expectedOutputImage->width, outputImage->width);
     ASSERT_EQ(expectedOutputImage->height, outputImage->height);
@@ -29,7 +29,7 @@ TEST(HistogramEqOMP, Borabora_1) {
 
     wbImage_t inputImage = wbImport(DATASET_FOLDER "borabora_1.ppm");
     wbImage_t expectedOutputImage = seq_iterative_histogram_equalization(inputImage, 4);
-    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4);
+    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4,16);
     // check if the output image is correct
     ASSERT_EQ(expectedOutputImage->width, outputImage->width);
     ASSERT_EQ(expectedOutputImage->height, outputImage->height);
@@ -48,7 +48,7 @@ TEST(HistogramEqOMP, Sample_5184_3456) {
 
     wbImage_t inputImage = wbImport(DATASET_FOLDER "sample_5184×3456.ppm");
     wbImage_t expectedOutputImage = seq_iterative_histogram_equalization(inputImage, 4);
-    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4);
+    wbImage_t outputImage = par_iterative_histogram_equalization(inputImage, 4, 15);
     // check if the output image is correct
     ASSERT_EQ(expectedOutputImage->width, outputImage->width);
     ASSERT_EQ(expectedOutputImage->height, outputImage->height);
@@ -100,6 +100,23 @@ TEST(HistogramEqCUDA, Borabora_1) {
 TEST(HistogramEqCUDA, Sample_5184_3456) {
 
     wbImage_t inputImage = wbImport(DATASET_FOLDER "sample_5184×3456.ppm");
+    wbImage_t expectedImage = seq_iterative_histogram_equalization(inputImage, 4);
+    float* expectedImageData = wbImage_getData(expectedImage);
+    const int imageWidth = wbImage_getWidth(expectedImage);
+    const int imageHeight = wbImage_getHeight(expectedImage);
+
+    wbImage_t outputImage = cuda_par_iterative_histogram_equalization(inputImage, 4);
+    float* resultImageData = wbImage_getData(outputImage);
+
+    // check if the output image is correct
+    for (int i = 0; i < imageHeight; i++)
+        for (int j = 0; j < imageWidth; j++)
+            EXPECT_NEAR(resultImageData[i * imageWidth + j], expectedImageData[i * imageWidth + j], 1e-2);
+}
+
+TEST(HistogramEqCUDA, untitled1) {
+
+    wbImage_t inputImage = wbImport(DATASET_FOLDER "Untitled1.ppm");
     wbImage_t expectedImage = seq_iterative_histogram_equalization(inputImage, 4);
     float* expectedImageData = wbImage_getData(expectedImage);
     const int imageWidth = wbImage_getWidth(expectedImage);

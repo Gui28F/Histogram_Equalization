@@ -27,7 +27,7 @@ namespace cp {
 
     void normalize(const int size_channels, const std::shared_ptr<unsigned char[]> &uchar_image,
                    const float *input_image_data,int chunk_size_channels) {
-        #pragma omp parallel for schedule(dynamic, chunk_size_channels) num_threads(n_threads)
+        #pragma omp parallel for schedule(static, chunk_size_channels) num_threads(n_threads)
         for (int i = 0; i < size_channels; i++)
             uchar_image[i] = (unsigned char) (255 * input_image_data[i]);
     }

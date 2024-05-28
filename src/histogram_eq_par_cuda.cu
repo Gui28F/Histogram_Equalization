@@ -16,7 +16,7 @@ namespace cp {
         // Check if idx is within bounds
         if (ii < height && jj < width) {
             for(int i = 0; i < 3; i++)
-                uchar_image[idx+i] = (unsigned char)(255.0f * input_image_data[idx+i]);
+                    uchar_image[idx+i] = (unsigned char)(255.0f * input_image_data[idx+i]);
 
             auto r = uchar_image[idx];
             auto g = uchar_image[idx + 1];
@@ -104,8 +104,6 @@ namespace cp {
 
         /*extractGrayScale_kernel<<<dimGrid2, dimBlock2>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
         cudaDeviceSynchronize();*/
-
-
 
         void* d_temp_storage = nullptr;
         size_t temp_storage_bytes = 0;
