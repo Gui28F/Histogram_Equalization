@@ -164,17 +164,16 @@ The code was in a cluster executed with the following specifications: \textbf{2x
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{images/new\_solo\_open.png}
+  \includegraphics[width=\linewidth]{images/openMP.png}
   \caption{Speedup across different number of threads usage of different images}
  \label{fig1}
-  \Description{Breakdown of the distribution of execution time across different number of thread usage}
 \end{figure}
 
 Figure \ref{fig1} describes the speed up for the different images in our test set. We can clearly see a rise on the speed up until a certain point. After that point the value of the speed up begins to decrease. The optimal \texttt{NR\_THREADS} to perform the computation is 16.
 
-In order to calculate the efficiency we will use the best result that we had: the one with 16 threads. For that we define $S_{16}$ which is the speed up with 16 threads and it will be equal to $$S_{16}=8$$
+In order to calculate the efficiency we will use the best result that we had: the one with 16 threads. For that we define $S_{16}$ which is the speed up with 16 threads and it will be equal to $$S_{16} \approx 11$$
 
-And the efficiency of the parallelel implementation in Section 1 get's us an efficiency value of: $$E_{16} = \frac{S_{16}}{16} = 50\%$$
+And the efficiency of the parallelel implementation in Section 1 get's us an efficiency value of: $$E_{16} = \frac{S_{16}}{16} \approx 69\%$$
 
 \section{CUDA}
 We've attained speed enhancements leveraging the OpenMP library for parallelizing our code. However, there exists an avenue to further escalate our computational efficiency. By harnessing the GPU architecture through CUDA, we can unlock additional acceleration potential.
@@ -244,9 +243,16 @@ Utilizing the capabilities of the GPU necessitates defining the grid dimensions.
   \includegraphics[width=\linewidth]{images/tilesss.png}
   \caption{Tiles Width and Execution Time}
  \label{fig2}
-  \Description{Breakdown of the distribution of execution time across different number of thread usage}
 \end{figure}
 To effectively evaluate the performance of the GPU-accelerated version, it's important to compare it against the most optimized configuration achieved with OpenMP (specifically, the one utilizing 16 threads). Figure \ref{fig3} illustrates the differences in speedup compared to the optimal OpenMP configuration.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{images/openMPCUDA.png}
+  \caption{OpenMP vs CUDA}
+ \label{fig3}
+\end{figure}
+
 
 
 
@@ -259,11 +265,11 @@ After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now
 \hline
 \textbf{SQT (ms)} & \textbf{OMPT (ms)} & \textbf{CUDAT (ms)} & \textbf{Image} \\
 \hline
-742 & 84 & 92 & borabora.ppm \\
+1140 & 98 & 76 & borabora.ppm \\
 \hline
-619 & 80 & 65 & input01.ppm \\
+956 & 76 & 63 & input01.ppm \\
 \hline
-29600 & 4320 & 2600 & sample.ppm \\
+10943 & 7122 & 2635 & sample.ppm \\
 \hline
 \end{tabular}
 \vspace{0.2cm} % Adjust the space here
