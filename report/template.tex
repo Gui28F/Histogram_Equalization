@@ -280,7 +280,7 @@ Each generation of results was derived from the average of five separate runs th
 \end{table}
 
 \section{Tests}
-During the development we guided ourselves with the GoogleTest for both the OpenMP and CUDA implementations. With these tests we are sure that the pixels of the resulting images are correct and not just visually correct by looking at the images. The test files are also available on the GitHub repository.
+During development, we utilized GoogleTest to guide our implementations for both OpenMP and CUDA. These tests ensured the accuracy of the pixel values in the resulting images, verifying correctness beyond mere visual inspection. Additionally, the test files used are available in our GitHub repository, providing transparency and allowing others to validate our results.
 
 \section{Conclusions}
 Whether through the integration of OpenMP directives or harnessing the power of GPU acceleration, we consistently observe improved results compared to the raw sequential implementation. Notably, in the case of the borabora.ppm image, an anomaly surfaces where the OpenMP implementation slightly outperforms the CUDA counterpart. We attribute this discrepancy to potential pixel saturation issues. Nonetheless, it's important to note that, in general, the CUDA implementation remains the preferred choice, with ongoing comparisons against OpenMP to ensure optimal performance.
