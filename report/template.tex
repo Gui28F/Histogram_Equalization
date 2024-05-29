@@ -107,14 +107,13 @@ The \textbf{grey scale conversion} will be improved in two ways. We will mix the
 function with this one in order to do everything in the same function. Besides that we also apply the following OpenMP directives: \texttt{\textbf{pragma omp parallel for}}
 with the option \texttt{\textbf{reduction(+:histogram)}} and \texttt{\textbf{num\_threads(n\_threads)}}. This code optimization can be seen in Listing \ref{lst:gray_function}.
 \begin{lstlisting}[language=C, caption=Grey Conversion Function, label={lst:gray_function}]
-	void convertoToGrayScale(//omitting for space) {
+	void extractGrayScale(//omitting for space) {
        	// filling the histogram with zeroes
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
-        		int chan_size = 3;
-                auto r = uchar_image[chan_size * i];
-                auto g = uchar_image[chan_size * i + 1];
-                auto b = uchar_image[chan_size * i + 2];
+                auto r = uchar_image[num_chan * i];
+                auto g = uchar_image[num_chan * i + 1];
+                auto b = uchar_image[num_chan * i + 2];
                 gray_image[i] = // Calculated
                 histogram[gray_image[i]]++;
             }
@@ -136,19 +135,19 @@ The \texttt{\textbf{correct\_color\_loop}} can be mixed with the \texttt{\textbf
     }
 \end{lstlisting}
 \subsection{Decions}
-It's important to justify our reasoning. We used \texttt{\textbf{static}} in every single call of the OpenMP directives because the extra overhead of orchistrating the threads with a certain amount of work did not compensate. As we can see in the Table \ref{table:staticanddynamic} \texttt{\textbf{static}} always shows better results and it's coherent to the theoretical analysis. For this simulation we used 16 threads and 100 iterations.
+It's important to justify our reasoning. We used \texttt{\textbf{static}} in every single call of the OpenMP directives because the extra overhead of orchistrating the threads with a certain amount of work did not compensate. As we can see in the Table \ref{table:staticanddynamic} \texttt{\textbf{static}} always shows better results and it's coherent to the theoretical analysis. For this simulation we used 16 threads and 100 iterations of the algorithm.
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{|c|c|c|}
 \hline
-\textbf{Dynamic Time (ms)} & \textbf{Static Time (ms)} & \textbf{Image Name} \\
+\textbf{Dynamic Speedup} & \textbf{Static Speedup} & \textbf{Image Name} \\
 \hline
-117 & 99& borabora.ppm \\
+9.7 & 11.5& borabora.ppm \\
 \hline
-98 & 81 & input01.ppm \\
+9.7 & 11.8 & input01.ppm \\
 \hline
-5620 & 4369 & sample.ppm \\
+7.7 & 9.9 & sample.ppm \\
 \hline
 \end{tabular}
 \vspace{0.2cm} % Adjust the space here
@@ -179,7 +178,7 @@ We've attained speed enhancements leveraging the OpenMP library for parallelizin
 
 To leverage the GPU effectively, we need to define kernels for specific regions of our code that we wish to offload to the GPU for computation. This necessitates defining grids use in CUDA kernels.
 
-Utilizing the GPU for optimization involves creating kernels to transfer data to the GPU, perform computations, and retrieve the results back to the CPU. Given the high cost associated with these operations, minimizing the number of kernels is imperative. After several iterations, we've determined that the minimum number of kernels required is three.
+Utilizing the GPU for optimization involves creating kernels to transfer data to the GPU, perform computations, and retrieve the results back to the CPU. Given the high cost associated with these operations, minimizing the number of kernels is imperative.
 
 The initial kernel handles both the normalization and grayscale operations. We can merge these two operations in one kernel since we don't need any prior computation before to calculate it. We don't need to create an extra overhead with two kernels in here. The Listing \ref{lst:gray_norm_function} shows this kernel implementation.
 
@@ -190,7 +189,7 @@ __global__ void normalize_kernel(//omitting for space) {
         int idx = (ii * width + jj)*3;
 
         if (ii < height && jj < width) {
-            for(int i = 0; i < 3; i++) {
+            for(int i = 0; i < num_chan; i++) {
                 // Normalize logic
             }
             auto r = uchar_image[idx];
@@ -212,7 +211,7 @@ Once we have computed this probability array, we can further utilize it in anoth
 
 The \texttt{\textbf{cub::DeviceScan::InclusiveSum}} function facilitates the calculation of the final cumulative distribution function (CDF) values. This not only streamlines the programming process but also optimizes computation time, offering significant efficiency gains. We used the \texttt{\textbf{InclusiveSum}} because it was not possible to use \texttt{\textbf{cub::DeviceScan::InclusiveScan}} due to restrictions in the library (there was no way to pass the probabilities to this call). That's why we must calculate the probabilities beforehand and use the \texttt{\textbf{InclusiveSum}}.
 
-Ultimately, we employ our final kernel, which could theoretically be executed within the first kernel. However, as we have seen that is not possible because certain things must be executed in order to run this last part of the algorithm. The code can be seen in Listing \ref{lst:last_func}.
+Ultimately, we employ our final kernel to run the last part of the algorithm. The code can be seen in Listing \ref{lst:last_func}.
 
 \begin{lstlisting}[language=C, caption=Correct and Rescale, label={lst:last_func}]
  __global__ void correct_kernel(//omitting for space) {
@@ -221,7 +220,7 @@ Ultimately, we employ our final kernel, which could theoretically be executed wi
         int idx = (ii * width + jj)*3;
 
         if (ii < height && jj < width) {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < num_chan; i++) {
                 auto cdf_val = d_cdf[uchar_image[idx+i]];
                 float cdf_min = d_cdf[0];
                 
@@ -243,7 +242,7 @@ Utilizing the capabilities of the GPU necessitates defining the grid dimensions.
   \caption{Tiles Width and Execution Time}
  \label{fig2}
 \end{figure}
-To effectively evaluate the performance of the GPU-accelerated version, it's important to compare it against the most optimized configuration achieved with OpenMP (specifically, the one utilizing 16 threads). Figure \ref{fig3} illustrates the differences in speedup compared to the optimal OpenMP configuration.
+To effectively evaluate the performance of the GPU-accelerated version, it's important to compare it against the most optimized configuration achieved with OpenMP (specifically, the one utilizing 16 threads). Figure \ref{fig3} illustrates the differences in speedup compared to the optimal OpenMP configuration (and the others also).
 
 \begin{figure}[h]
   \centering
@@ -270,7 +269,7 @@ Each generation of results was derived from the average of five separate runs th
 \hline
 956 & 76 & 63 & input01.ppm \\
 \hline
-10943 & 4371 & 2635 & sample.ppm \\
+43593 & 4371 & 2635 & sample.ppm \\
 \hline
 \end{tabular}
 \vspace{0.2cm} % Adjust the space here
@@ -278,7 +277,25 @@ Each generation of results was derived from the average of five separate runs th
 \label{table:final}
 \end{table}
 
-As observed in all the images of Table \ref{table:final} , even with the best OpenMP configuration, CUDA consistently outperforms it in terms of speed. The superior capabilities of the GPU significantly accelerate our computations, and this performance difference becomes increasingly noticeable with larger image sizes.
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{OpenMP Speedup} & \textbf{CUDA Speedup} & \textbf{Image} \\
+\hline
+11.5 & 15 & borabora.ppm \\
+\hline
+11.8 & 15.2 & input01.ppm \\
+\hline
+9.9 & 16.5 & sample.ppm \\
+\hline
+\end{tabular}
+\vspace{0.2cm} % Adjust the space here
+\caption{Final Speedup Values}
+\label{table:speeds}
+\end{table}
+
+As observed in all the images of Table \ref{table:final} and Table \ref{table:speeds} , even with the best OpenMP configuration, CUDA consistently outperforms it in terms of speed. The superior capabilities of the GPU significantly accelerate our computations, and this performance difference becomes increasingly noticeable with larger image sizes.
 
 \section{Tests}
 During development, we utilized GoogleTest to guide our implementations for both OpenMP and CUDA. These tests ensured the accuracy of the pixel values in the resulting images, verifying correctness beyond mere visual inspection. Additionally, the test files used are available in our GitHub repository, providing transparency and allowing others to validate our results.
