@@ -90,7 +90,7 @@ not so computational heavy functions.
  To reduce the impact on processing time caused by these functions within the algorithm, we integrated OpenMP directives into these specific parts of the code to accelerate computation.
  
  It's important to highlight the \textbf{thread management}. Since we are working with images we will have to do some simples calculus to determine the amount of work that
- each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * 3}$ and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * 3}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by 3 getting the \texttt{CHUNK\_SIZE}. Now we will have the work that will be balanced between threads.
+ each thread will be given. For that we must perform two calculations (one for RGB and one for the grey scale). For the RGB  we will calculate $\texttt{WIDTH * HEIGHT * CHAN\_SIZE}$  (the 3 RGB channels) and to obtain the \texttt{CHUNK\_SIZE\_RGB} we just divide $\texttt{WIDTH * HEIGHT * CHAN\_SIZE}$  by \texttt{N\_THREADS}. For the grey scale it's similar but we don't multiply by \texttt{CHAN\_SIZE} getting the \texttt{CHUNK\_SIZE}. Now we will have the work that will be balanced between threads.
  
 \subsection{\textbf{Function parallelization}}
 
@@ -111,12 +111,11 @@ with the option \texttt{\textbf{reduction(+:histogram)}} and \texttt{\textbf{num
        	// filling the histogram with zeroes
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
-                auto r = uchar_image[3 * i];
-                auto g = uchar_image[3 * i + 1];
-                auto b = uchar_image[3 * i + 2];
-                gray_image[i] = 
-                static_cast<unsigned char>
-                (0.21 * r + 0.71 * g + 0.07 * b);
+        		int chan_size = 3;
+                auto r = uchar_image[chan_size * i];
+                auto g = uchar_image[chan_size * i + 1];
+                auto b = uchar_image[chan_size * i + 2];
+                gray_image[i] = // Calculated
                 histogram[gray_image[i]]++;
             }
     }
@@ -180,9 +179,9 @@ We've attained speed enhancements leveraging the OpenMP library for parallelizin
 
 To leverage the GPU effectively, we need to define kernels for specific regions of our code that we wish to offload to the GPU for computation. This necessitates defining grids use in CUDA kernels.
 
-Utilizing the GPU for optimization involves creating kernels to transfer data to the GPU, perform computations, and retrieve the results back to the CPU. Given the high cost associated with these operations, minimizing the number of kernels is imperative. After several iterations, we've determined that the minimum number of kernels required is three. Due to dependencies, namely the need for histogram calculation in operations like correcting colors and resizing, we cannot combine the first kernel with the third one.
+Utilizing the GPU for optimization involves creating kernels to transfer data to the GPU, perform computations, and retrieve the results back to the CPU. Given the high cost associated with these operations, minimizing the number of kernels is imperative. After several iterations, we've determined that the minimum number of kernels required is three.
 
-The initial kernel handles both the normalization and grayscale operations. Since these operations are independent of each other, we can consolidate them into a single kernel instead of creating two separate ones. The Listing \ref{lst:gray_norm_function} shows this kernel implementation.
+The initial kernel handles both the normalization and grayscale operations. We can merge these two operations in one kernel since we don't need any prior computation before to calculate it. We don't need to create an extra overhead with two kernels in here. The Listing \ref{lst:gray_norm_function} shows this kernel implementation.
 
 \begin{lstlisting}[language=C, caption=Grey Conversion and Normalization, label={lst:gray_norm_function}]
 __global__ void normalize_kernel(//omitting for space) {
@@ -205,15 +204,15 @@ __global__ void normalize_kernel(//omitting for space) {
 
 Before proceeding to the second kernel, it's essential to calculate the histogram. While we could create a custom kernel for this task, a more efficient approach involves leveraging the \texttt{\textbf{CUB}} library. By utilizing its operations, we can significantly enhance the performance of our code.
 
-By using \texttt{\textbf{cub::DeviceHistogram::HistogramEven}} we are able to calculate the histogram in the GPU without making the kernel ourselves.
+Using \texttt{\textbf{cub::DeviceHistogram::HistogramEven}} we are able to calculate the histogram in the GPU without making the kernel ourselves.
 
-After having the histogram we can calculate the probabilities in order to use them in another call to the \texttt{\textbf{CUB}} library. For that we create a second kernel, which will seem more clear why ahead. This one will differ from the first one in the \texttt{\textbf{numBlocks}} and \texttt{\textbf{blockSize}}. The \texttt{\textbf{numBlocks}} will be $256$ and the \texttt{\textbf{blockSize}} will be \texttt{(HISTOGRAM\_LEN+ blockSize-1) / blockSize}.
+After having the histogram we can calculate the probabilities in order to use them in another call to the \texttt{\textbf{CUB}} library. For that we create a second kernel, which will seem more clear why ahead. This one will differ from the first one in the \texttt{\textbf{numBlocks}} and \texttt{\textbf{blockSize}}. The \texttt{\textbf{numBlocks}} will be $256$ and the \texttt{\textbf{blockSize}} will be \texttt{(HISTOGRAM\_LEN+ blockSize-1) / blockSize}, that's why we couldn't re-use the first kernel due to this size and the \texttt{CUB} library usage.
 
 Once we have computed this probability array, we can further utilize it in another function provided by the \texttt{\textbf{CUB}}  library.
 
 The \texttt{\textbf{cub::DeviceScan::InclusiveSum}} function facilitates the calculation of the final cumulative distribution function (CDF) values. This not only streamlines the programming process but also optimizes computation time, offering significant efficiency gains. We used the \texttt{\textbf{InclusiveSum}} because it was not possible to use \texttt{\textbf{cub::DeviceScan::InclusiveScan}} due to restrictions in the library (there was no way to pass the probabilities to this call). That's why we must calculate the probabilities beforehand and use the \texttt{\textbf{InclusiveSum}}.
 
-Ultimately, we employ our final kernel, which could theoretically be executed within the first kernel. However, due to dependencies necessitating separate execution, we're compelled to create this third kernel to handle the last part of the algorithm. The code can be seen in Listing \ref{lst:last_func}.
+Ultimately, we employ our final kernel, which could theoretically be executed within the first kernel. However, as we have seen that is not possible because certain things must be executed in order to run this last part of the algorithm. The code can be seen in Listing \ref{lst:last_func}.
 
 \begin{lstlisting}[language=C, caption=Correct and Rescale, label={lst:last_func}]
  __global__ void correct_kernel(//omitting for space) {
@@ -236,7 +235,7 @@ Ultimately, we employ our final kernel, which could theoretically be executed wi
 These kernels constitute the entirety of the GPU-accelerated operations. Due to space constraints, significant portions of the code have been omitted. For the complete implementation, please refer to the accessible code at \url{https://github.com/Gui28F/CP-Project}. 
 
 \section{Metric Analysis - CUDA}
-Utilizing the capabilities of the GPU necessitates defining the grid dimensions. To determine the optimal \texttt{TILE\_WIDTH} value, we conducted an experiment, the results of which are depicted in Figure \ref{fig2}. It was discerned that the most favorable value was 16. Notably, we are constrained from exceeding 32 due to the limitation imposed by the maximum thread utilization, capped at $32 * 32 = 1024$.
+Utilizing the capabilities of the GPU necessitates defining the grid dimensions. To determine the optimal \texttt{TILE\_WIDTH} value, we conducted an experiment, the results of which are depicted in Figure \ref{fig2}. It was discerned that the most favorable value was 16. Notably, we are constrained from exceeding 32 due to the limitation imposed by the maximum number of thread per block, capped at $32 * 32 = 1024$.
 
 \begin{figure}[h]
   \centering
@@ -276,14 +275,16 @@ Each generation of results was derived from the average of five separate runs th
 \end{tabular}
 \vspace{0.2cm} % Adjust the space here
 \caption{Final Execution Times}
-\label{table:staticanddynamic}
+\label{table:final}
 \end{table}
+
+As observed in all the images of Table \ref{table:final} , even with the best OpenMP configuration, CUDA consistently outperforms it in terms of speed. The superior capabilities of the GPU significantly accelerate our computations, and this performance difference becomes increasingly noticeable with larger image sizes.
 
 \section{Tests}
 During development, we utilized GoogleTest to guide our implementations for both OpenMP and CUDA. These tests ensured the accuracy of the pixel values in the resulting images, verifying correctness beyond mere visual inspection. Additionally, the test files used are available in our GitHub repository, providing transparency and allowing others to validate our results.
 
 \section{Conclusions}
-Whether through the integration of OpenMP directives or harnessing the power of GPU acceleration, we consistently observe improved results compared to the raw sequential implementation. Notably, in the case of the borabora.ppm image, an anomaly surfaces where the OpenMP implementation slightly outperforms the CUDA counterpart. We attribute this discrepancy to potential pixel saturation issues. Nonetheless, it's important to note that, in general, the CUDA implementation remains the preferred choice, with ongoing comparisons against OpenMP to ensure optimal performance.
+Whether through the integration of OpenMP directives or harnessing the power of GPU acceleration, we consistently observe improved results compared to the raw sequential implementation. In all our tests, CUDA consistently delivers superior performance compared to OpenMP. The enhanced capabilities of GPUs allow CUDA to handle computations more efficiently, resulting in faster processing times across various image sizes and complexities. This makes CUDA the preferred choice for achieving optimal performance in our implementations.
 
 \section{Code}
 All the code mentioned above can be consulted in \url{https://github.com/Gui28F/CP-Project}.
