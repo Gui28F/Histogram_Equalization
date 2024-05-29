@@ -1,15 +1,9 @@
 #!/bin/bash
 
-# Create a directory named 'build'
 mkdir build
-
-# Navigate into the 'build' directory
 cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
 
-# Run CMake to generate build files
-cmake ..
-
-# Build the project
 make
 echo "Sequential(n_iterations = 100):"
 echo "Average time for borabora_1.ppm photo:"

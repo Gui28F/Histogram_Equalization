@@ -168,6 +168,7 @@ namespace cp {
                                    d_histogram, d_cdf);
 
             cudaMemcpy(d_input_image_data, d_output_image_data, size_channels*sizeof(float), cudaMemcpyDeviceToDevice);
+            //d_input_image_data = d_output_image_data;
         }
         cudaMemcpy(host_output_image_data, d_output_image_data, width * height * channels * sizeof(float), cudaMemcpyDeviceToHost);
         cudaFree(d_input_image_data);
