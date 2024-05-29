@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 19:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 19:34
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1055,34 +1055,63 @@ Package pdftex.def Info: images/openMP.png  used on input line 165.
 
 Class acmart Warning: A possible image without description on input line 168.
 
+LaTeX Font Info:    Trying to load font information for TS1+LinuxLibertineT-TLF
+ on input line 180.
+
+(/usr/local/texlive/2023/texmf-dist/tex/latex/libertine/TS1LinuxLibertineT-TLF.
+fd
+File: TS1LinuxLibertineT-TLF.fd 2017/03/20 (autoinst) Font definitions for TS1/
+LinuxLibertineT-TLF.
+)
+LaTeX Font Info:    Font shape `TS1/LinuxLibertineT-TLF/b/n' will be
+(Font)              scaled to size 9.0pt on input line 180.
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `LinuxLibertineT-TLF' (encoding: TS1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+
+Overfull \hbox (11.86414pt too wide) in paragraph at lines 178--204
+ [][] 
+ []
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 213.
+(Font)              scaled to size 9.0pt on input line 232.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 7.0pt on input line 213.
+(Font)              scaled to size 7.0pt on input line 232.
 [2.2{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.e
-nc} <./images/openMP.png>]
-<images/tilesss.png, id=141, 718.93594pt x 436.63126pt>
+nc}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_7f4ce4.en
+c} <./images/openMP.png>]
+<images/tilesss.png, id=142, 718.93594pt x 436.63126pt>
 File: images/tilesss.png Graphic file (type png)
 <use images/tilesss.png>
-Package pdftex.def Info: images/tilesss.png  used on input line 241.
+Package pdftex.def Info: images/tilesss.png  used on input line 271.
 (pdftex.def)             Requested size: 241.14749pt x 146.45392pt.
 
 
-Class acmart Warning: A possible image without description on input line 244.
-
-<images/openMPCUDA.png, id=143, 722.7pt x 433.62pt>
-File: images/openMPCUDA.png Graphic file (type png)
-<use images/openMPCUDA.png>
-Package pdftex.def Info: images/openMPCUDA.png  used on input line 249.
-(pdftex.def)             Requested size: 241.14749pt x 144.68962pt.
-
-Class acmart Warning: A possible image without description on input line 252.
+Class acmart Warning: A possible image without description on input line 274.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
+<images/openMPCUDA.png, id=144, 722.7pt x 433.62pt>
+File: images/openMPCUDA.png Graphic file (type png)
+<use images/openMPCUDA.png>
+Package pdftex.def Info: images/openMPCUDA.png  used on input line 279.
+(pdftex.def)             Requested size: 241.14749pt x 144.68962pt.
+
+Class acmart Warning: A possible image without description on input line 282.
+
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/b/n' will be
-(Font)              scaled to size 7.0pt on input line 258.
+(Font)              scaled to size 7.0pt on input line 288.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
 [3.3 <./images/tilesss.png> <./images/openMPCUDA.png>]
 No file template.bbl.
 
@@ -1108,11 +1137,11 @@ Package rerunfilecheck Info: File `template.out' has not changed.
 (rerunfilecheck)             Checksum: B26D9E11366879FF6031426C8C6B8BBB;1918.
  ) 
 Here is how much of TeX's memory you used:
- 22872 strings out of 476025
- 365804 string characters out of 5790018
+ 22920 strings out of 476025
+ 367189 string characters out of 5790018
  2228388 words of memory out of 5000000
- 42397 multiletter control sequences out of 15000+600000
- 634531 words of font info for 257 fonts, out of 8000000 for 9000
+ 42430 multiletter control sequences out of 15000+600000
+ 635470 words of font info for 263 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  85i,12n,131p,1005b,1726s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/inconsolata/Inconsolat
@@ -1125,10 +1154,10 @@ blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
 1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
 /type1/public/newtx/txmiaX.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
 public/newtx/txsys.pfb>
-Output written on template.pdf (4 pages, 525338 bytes).
+Output written on template.pdf (4 pages, 526636 bytes).
 PDF statistics:
- 248 PDF objects out of 1000 (max. 8388607)
- 212 compressed objects within 3 object streams
- 89 named destinations out of 1000 (max. 500000)
- 70280 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 252 PDF objects out of 1000 (max. 8388607)
+ 215 compressed objects within 3 object streams
+ 88 named destinations out of 1000 (max. 500000)
+ 74376 words of extra memory for PDF output out of 89155 (max. 10000000)
 
