@@ -8,14 +8,14 @@
 namespace cp {
     constexpr auto HISTOGRAM_LENGTH = 256;
 
-    __global__ void normalize_kernel(int width, const int height, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image) {
+    __global__ void normalize_kernel(int width, const int height,const int num_channels, unsigned char *uchar_image, const float *input_image_data, unsigned char* gray_image) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
-        int idx = (ii * width + jj)*3; // This was the fix for the last image
+        int idx = (ii * width + jj)*num_channels; // This was the fix for the last image
 
         // Check if idx is within bounds
         if (ii < height && jj < width) {
-            for(int i = 0; i < 3; i++)
+            for(int i = 0; i < num_channels; i++)
                     uchar_image[idx+i] = (unsigned char)(255.0f * input_image_data[idx+i]);
 
             auto r = uchar_image[idx];
@@ -52,14 +52,14 @@ namespace cp {
     }
 
     // LMAO?
-    __global__ void correct_kernel(int width, int height, const float *d_cdf, unsigned char *uchar_image,float *output_image_data) {
+    __global__ void correct_kernel(int width, int height,const int num_channels, const float *d_cdf, unsigned char *uchar_image,float *output_image_data) {
         int ii = blockIdx.y * blockDim.y + threadIdx.y;
         int jj = blockIdx.x * blockDim.x + threadIdx.x;
-        int idx = (ii * width + jj)*3;
+        int idx = (ii * width + jj)*num_channels;
 
         // Check if idx is within bounds
         if (ii < height && jj < width) {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < num_channels; i++) {
                 auto cdf_val = d_cdf[uchar_image[idx+i]];
                 float cdf_min = d_cdf[0];
 
@@ -99,7 +99,7 @@ namespace cp {
         dim3 dimGrid2((width + TILE_WIDTH- 1) / TILE_WIDTH, (height + TILE_WIDTH- 1) / TILE_WIDTH );
 
         cudaMemset(d_histogram, 0, HISTOGRAM_LENGTH * sizeof(unsigned int));
-        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_uchar_image, d_input_image_data, d_gray_image); // OK
+        normalize_kernel<<<dimGrid2, dimBlock2>>>(width, height,size_channels, d_uchar_image, d_input_image_data, d_gray_image); // OK
         //cudaDeviceSynchronize();
 
         /*extractGrayScale_kernel<<<dimGrid2, dimBlock2>>>(width, height,d_uchar_image, d_gray_image, d_histogram); // OK
@@ -126,7 +126,7 @@ namespace cp {
         cudaFree(d_temp_storage);
         //cudaDeviceSynchronize();//ok
 
-        correct_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_cdf, d_uchar_image, d_output_image_data);
+        correct_kernel<<<dimGrid2, dimBlock2>>>(width, height,size_channels, d_cdf, d_uchar_image, d_output_image_data);
         //cudaDeviceSynchronize(); // OK
 
         /*rescale_kernel<<<dimGrid2, dimBlock2>>>(width, height, d_output_image_data, d_uchar_image);
@@ -162,7 +162,7 @@ namespace cp {
         cudaMalloc(&d_cdf, HISTOGRAM_LENGTH * sizeof(float));
 
         for (int i = 0; i < iterations; i++){
-            histogram_equalization(width, height, size_channels,
+            histogram_equalization(width, height, channels,
                                    d_input_image_data, d_output_image_data,
                                    d_uchar_image, d_gray_image,
                                    d_histogram, d_cdf);

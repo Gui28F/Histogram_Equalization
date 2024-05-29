@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-gpu_ex = [11,8,246]
+gpu_ex = [76,63,2635]
+
 def read_execution_times(file_name):
     execution_times = {}
     with open(file_name, 'r') as file:
@@ -30,14 +31,14 @@ def plot_execution_times(files, gpu_ex):
         color = line.get_color()
 
         # Calculate and plot GPU speedup line with the same color
-        #seq_time = sum(execution_times["1"]) / len(execution_times["1"])
-        #gpu_speedup = seq_time / gpu_ex[idx]
-        #print(gpu_speedup)
-        #plt.axhline(y=gpu_speedup, color=color, linestyle='--', label=f'GPU {os.path.basename(file_name.split(".")[0])}')
+        seq_time = sum(execution_times["1"]) / len(execution_times["1"])
+        gpu_speedup = seq_time / gpu_ex[idx]
+        print(gpu_speedup)
+        plt.axhline(y=gpu_speedup, color=color, linestyle='--', label=f'GPU {os.path.basename(file_name.split(".")[0])}')
 
     plt.xlabel('Number of Threads')
     plt.ylabel('Speedup')
-    plt.title('Speedup for Each Number of Threads (Iterations = 10)')
+    plt.title('Speedup for Each Number of Threads (Iterations = 100)')
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -67,7 +68,7 @@ def a ():
 
     # Show plot
     plt.show()
-a()
+#a()
 # Example usage with a list of file names
 files = ["borabora_1.txt", "input01.txt" ,"sample_5184×3456.txt"]
-#plot_execution_times(files, gpu_ex)
+plot_execution_times(files, gpu_ex)

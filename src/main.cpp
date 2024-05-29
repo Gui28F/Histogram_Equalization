@@ -4,18 +4,18 @@
 #include <chrono>
 
 
-/*int main(int argc, char **argv) {
-    if (argc != 4) {
+int main(int argc, char **argv) {
+    if (argc != 5) {
         std::cerr << "Usage: " << argv[0] << " input_image.ppm n_iterations output_image.ppm\n";
         return 1;
     }
 
-    std::string files[4] = { "borabora_1", "input01", "sample_5184×3456" , "Untitled"};
-    for(int f = 0; f < 4; f++)
+    std::string files[3] = { "borabora_1", "input01", "sample_5184×3456" };
+    for(int f = 0; f < 3; f++)
     {
         auto file = files[f];
         int n_iterations = static_cast<int>(std::strtol(argv[2], nullptr, 10));
-        constexpr int num_threads = 1;
+        constexpr int num_threads = 16;
         constexpr int num_executions = 5;
 
         std::ofstream outfile(string(file)+".txt");
@@ -24,7 +24,7 @@
             return 1;
         }
 
-        for (int i = 1; i <= num_threads; ++i) {
+        for (int i = 16; i <= num_threads; ++i) {
             std::cout << i << std::endl;
             outfile << i << ": ";
 
@@ -49,10 +49,10 @@
     }
 
     return 0;
-}*/
+}
 
 
-int main(int argc, char **argv)
+/*int main(int argc, char **argv)
 {
     if (argc != 5) {
         std::cout << "usage" << argv[0] << " input_image.ppm n_iterations output_image.ppm threads_num\n";
@@ -75,4 +75,4 @@ int main(int argc, char **argv)
     //wbExport(argv[3], outputImage);
     std::cout << avg << std::endl;
     return 0;
-}
+}*/

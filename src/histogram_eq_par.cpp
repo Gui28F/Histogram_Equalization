@@ -32,15 +32,15 @@ namespace cp {
             uchar_image[i] = (unsigned char) (255 * input_image_data[i]);
     }
 
-    void extractGrayScale(const int height, const int width, const std::shared_ptr<unsigned char[]> &uchar_image,
+    void extractGrayScale(const int height, const int width, const int num_channels, const std::shared_ptr<unsigned char[]> &uchar_image,
                           const std::shared_ptr<unsigned char[]> &gray_image, int (&histogram)[256],const int size, int chunk_size) {
         std::fill(histogram, histogram + HISTOGRAM_LENGTH, 0);
 
         #pragma omp parallel for reduction(+:histogram) num_threads(n_threads)
         for (int i = 0; i < size; i++){
-                auto r = uchar_image[3 * i];
-                auto g = uchar_image[3 * i + 1];
-                auto b = uchar_image[3 * i + 2];
+                auto r = uchar_image[num_channels * i];
+                auto g = uchar_image[num_channels * i + 1];
+                auto b = uchar_image[num_channels * i + 2];
                 gray_image[i] = static_cast<unsigned char>(0.21 * r + 0.71 * g + 0.07 * b);
                 histogram[gray_image[i]]++;
 
@@ -79,7 +79,7 @@ namespace cp {
 
 
 
-    static void histogram_equalization(const int width, const int height,
+    static void histogram_equalization(const int width, const int height, const int channels,
                                        const float *input_image_data,
                                        float *output_image_data,
                                        std::shared_ptr<unsigned char[]> &uchar_image,
@@ -87,14 +87,13 @@ namespace cp {
                                        int (&histogram)[HISTOGRAM_LENGTH],
                                        float (&cdf)[HISTOGRAM_LENGTH]) {
 
-        constexpr auto channels = 3;
         const auto size = width * height;
         const auto size_channels = size * channels;
         const auto chunk_size = size / n_threads;
         const auto chunk_size_channels = size_channels / n_threads;
         normalize(size_channels, uchar_image, input_image_data, chunk_size_channels);
 
-        extractGrayScale(height, width, uchar_image, gray_image, histogram, size, chunk_size);
+        extractGrayScale(height, width,channels, uchar_image, gray_image, histogram, size, chunk_size);
 
         calculate_cdf(cdf, histogram,size);
 
@@ -108,7 +107,7 @@ namespace cp {
         n_threads = num_threads;
         const auto width = wbImage_getWidth(input_image);
         const auto height = wbImage_getHeight(input_image);
-        constexpr auto channels = 3;
+        const int channels = wbImage_getChannels(input_image);
         const auto size = width * height;
         const auto size_channels = size * channels;
 
@@ -123,7 +122,7 @@ namespace cp {
         float cdf[HISTOGRAM_LENGTH];
 
         for (int i = 0; i < iterations; i++) {
-            histogram_equalization(width, height,
+            histogram_equalization(width, height,channels,
                                    input_image_data, output_image_data,
                                    uchar_image, gray_image,
                                    histogram, cdf);
