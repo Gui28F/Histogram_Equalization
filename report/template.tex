@@ -121,7 +121,7 @@ with the option \texttt{\textbf{reduction(+:histogram)}} and \texttt{\textbf{num
             }
     }
 \end{lstlisting}
-The function that \textbf{calculated the CDF} doesn't require any type of parallelization. It's a simple for loop that executes 256 iterations every time.
+We can't parallelize the \textbf{CDF calculcation} because it has true dependencies between iterations and also it's not worth due to the number of iterations (256).
 Another function that we managed to simplify was the \texttt{cdf\_min\_loop}. Since we minimum will always be on the first position we just return it and that's how we compute
 the minimum of the CDF.
 
@@ -137,7 +137,7 @@ The \texttt{\textbf{correct\_color\_loop}} can be mixed with the \texttt{\textbf
     }
 \end{lstlisting}
 \subsection{Decions}
-It's important to justify our reasoning. We used \texttt{\textbf{static}} in every single call of the OpenMP directives because the extra overhead of orchistrating the threads with a certain amount of work did not compensate. As we can see in the Table \ref{table:staticanddynamic} \texttt{\textbf{static}} always shows better results and it's coherent to the theoretical analysis. For this simulation we used 16 threads.
+It's important to justify our reasoning. We used \texttt{\textbf{static}} in every single call of the OpenMP directives because the extra overhead of orchistrating the threads with a certain amount of work did not compensate. As we can see in the Table \ref{table:staticanddynamic} \texttt{\textbf{static}} always shows better results and it's coherent to the theoretical analysis. For this simulation we used 16 threads and 100 iterations.
 
 \begin{table}[h!]
 \centering
@@ -259,6 +259,8 @@ To effectively evaluate the performance of the GPU-accelerated version, it's imp
 \section{Final Results}
 After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now have a clearer understanding of the overall performance. The table presents execution times for the purely sequential implementation, the \textbf{OpenMP} implementation, and the \textbf{CUDA} implementation. These results, obtained from 100 iterations of the algorithm, represent the mean calculated values derived from running the algorithm five times.The names were shortened in the table \footnote{\textbf{Description:} SQT -- Sequential Time, OMPT -- OpenMP Time, CUDAT -- CUDA Time}.
 
+Each generation of results was derived from the average of five separate runs the algorithm with 100 iterations. By calculating the mean of these five separate executions, we aimed to obtain more reliable and trustworthy results. This approach ensured that our findings were not skewed by anomalies in any single run, providing a more accurate representation of the algorithm's performance.
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{|c|c|c|c|}
@@ -276,6 +278,10 @@ After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now
 \caption{Final Execution Times}
 \label{table:staticanddynamic}
 \end{table}
+
+\section{Tests}
+During the development we guided ourselves with the GoogleTest for both the OpenMP and CUDA implementations. With these tests we are sure that the pixels of the resulting images are correct and not just visually correct by looking at the images. The test files are also available on the GitHub repository.
+
 \section{Conclusions}
 Whether through the integration of OpenMP directives or harnessing the power of GPU acceleration, we consistently observe improved results compared to the raw sequential implementation. Notably, in the case of the borabora.ppm image, an anomaly surfaces where the OpenMP implementation slightly outperforms the CUDA counterpart. We attribute this discrepancy to potential pixel saturation issues. Nonetheless, it's important to note that, in general, the CUDA implementation remains the preferred choice, with ongoing comparisons against OpenMP to ensure optimal performance.
 

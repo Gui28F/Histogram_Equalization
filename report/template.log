@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 11:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 11:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1043,7 +1043,7 @@ r/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr
 
 {/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{
 /usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}]
-<images/openMP.png, id=103, 722.7pt x 433.62pt>
+<images/openMP.png, id=107, 722.7pt x 433.62pt>
 File: images/openMP.png Graphic file (type png)
 <use images/openMP.png>
 Package pdftex.def Info: images/openMP.png  used on input line 167.
@@ -1058,7 +1058,7 @@ LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
 (Font)              scaled to size 7.0pt on input line 215.
 [2.2{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.e
 nc} <./images/openMP.png>]
-<images/tilesss.png, id=140, 718.93594pt x 436.63126pt>
+<images/tilesss.png, id=145, 718.93594pt x 436.63126pt>
 File: images/tilesss.png Graphic file (type png)
 <use images/tilesss.png>
 Package pdftex.def Info: images/tilesss.png  used on input line 243.
@@ -1067,7 +1067,7 @@ Package pdftex.def Info: images/tilesss.png  used on input line 243.
 
 Class acmart Warning: A possible image without description on input line 246.
 
-<images/openMPCUDA.png, id=142, 722.7pt x 433.62pt>
+<images/openMPCUDA.png, id=147, 722.7pt x 433.62pt>
 File: images/openMPCUDA.png Graphic file (type png)
 <use images/openMPCUDA.png>
 Package pdftex.def Info: images/openMPCUDA.png  used on input line 251.
@@ -1077,8 +1077,8 @@ Class acmart Warning: A possible image without description on input line 254.
 
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/b/n' will be
 (Font)              scaled to size 7.0pt on input line 260.
-No file template.bbl.
 [3.3 <./images/tilesss.png> <./images/openMPCUDA.png>]
+No file template.bbl.
 
 Class acmart Warning: Some images may lack descriptions.
 
@@ -1091,10 +1091,6 @@ Class acmart Warning: ACM reference format is mandatory
 
 Class acmart Warning: CCS concepts are mandatory for papers over two pages.
 
-
-Overfull \vbox (1.999pt too high) has occurred while \output is active []
-
-
 (/usr/local/texlive/2023/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 )
@@ -1106,13 +1102,13 @@ File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `template.out' has not changed.
-(rerunfilecheck)             Checksum: 5CEB494318887C82268D39DE0D74BC04;1836.
+(rerunfilecheck)             Checksum: B26D9E11366879FF6031426C8C6B8BBB;1918.
  ) 
 Here is how much of TeX's memory you used:
- 22858 strings out of 476025
- 365527 string characters out of 5790018
+ 22860 strings out of 476025
+ 365550 string characters out of 5790018
  2266388 words of memory out of 5000000
- 42392 multiletter control sequences out of 15000+600000
+ 42393 multiletter control sequences out of 15000+600000
  633712 words of font info for 251 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  85i,12n,131p,1005b,1726s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1126,10 +1122,10 @@ blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
 1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
 /type1/public/newtx/txmiaX.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
 public/newtx/txsys.pfb>
-Output written on template.pdf (4 pages, 523979 bytes).
+Output written on template.pdf (4 pages, 524974 bytes).
 PDF statistics:
- 243 PDF objects out of 1000 (max. 8388607)
- 207 compressed objects within 3 object streams
- 89 named destinations out of 1000 (max. 500000)
- 70272 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 247 PDF objects out of 1000 (max. 8388607)
+ 211 compressed objects within 3 object streams
+ 90 named destinations out of 1000 (max. 500000)
+ 70280 words of extra memory for PDF output out of 74296 (max. 10000000)
 
