@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 11:53
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 11:56
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1106,7 +1106,7 @@ Package rerunfilecheck Info: File `template.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  22860 strings out of 476025
- 365550 string characters out of 5790018
+ 365547 string characters out of 5790018
  2266388 words of memory out of 5000000
  42393 multiletter control sequences out of 15000+600000
  633712 words of font info for 251 fonts, out of 8000000 for 9000
@@ -1122,7 +1122,7 @@ blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
 1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
 /type1/public/newtx/txmiaX.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
 public/newtx/txsys.pfb>
-Output written on template.pdf (4 pages, 524974 bytes).
+Output written on template.pdf (4 pages, 525068 bytes).
 PDF statistics:
  247 PDF objects out of 1000 (max. 8388607)
  211 compressed objects within 3 object streams
