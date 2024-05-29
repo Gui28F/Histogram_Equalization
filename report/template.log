@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 22:03
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 22:04
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1133,8 +1133,14 @@ File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
 ) [4.4]
 (./template.aux)
-Package rerunfilecheck Info: File `template.out' has not changed.
-(rerunfilecheck)             Checksum: B26D9E11366879FF6031426C8C6B8BBB;1918.
+
+Package rerunfilecheck Warning: File `template.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `template.out':
+(rerunfilecheck)             Before: 9C4D5B57A9DF6DE2D8ECB35B3C57A660;1948
+(rerunfilecheck)             After:  6C28214643E7218B839A7F1B1990E852;1953.
  ) 
 Here is how much of TeX's memory you used:
  22920 strings out of 476025
@@ -1154,7 +1160,7 @@ blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
 1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
 /type1/public/newtx/txmiaX.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
 public/newtx/txsys.pfb>
-Output written on template.pdf (4 pages, 526648 bytes).
+Output written on template.pdf (4 pages, 526673 bytes).
 PDF statistics:
  253 PDF objects out of 1000 (max. 8388607)
  216 compressed objects within 3 object streams
