@@ -62,11 +62,12 @@ int main(int argc, char **argv)
     wbImage_t inputImage = wbImport(argv[1]);
     int n_iterations = static_cast<int>(std::strtol(argv[2], nullptr, 10));
     int n = 5;
+    int num_threads = std::stoi(argv[4]);
     double avg = 0;
     for(int i = 0; i < n; i++)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        wbImage_t outputImage = cp::iterative_histogram_equalization(inputImage, n_iterations,std::stoi(argv[4]));
+        wbImage_t outputImage = cp::iterative_histogram_equalization(inputImage, n_iterations,num_threads);
         auto stop = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<double, std::milli> duration = stop - start;
         double milliseconds = duration.count();
