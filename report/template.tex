@@ -177,7 +177,7 @@ And the efficiency of the parallelel implementation in Section 1 get's us an eff
 \centering
 \begin{tabular}{cccc}
 \toprule
-\textbf{Nº of Threads} & \textbf{borabora.ppm} & \textbf{input01.ppn} & \textbf{sample.ppm} \\
+\textbf{Nº of Threads} & \textbf{borabora.ppm} & \textbf{input01.ppm} & \textbf{sample.ppm} \\
 \midrule
 1  & 21 & 18 & 18  \\
 2  & 16 & 21 & 59  \\
@@ -285,9 +285,9 @@ To effectively evaluate the performance of the GPU-accelerated version, it's imp
 
 
 \section{Final Results}
-After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now have a clearer understanding of the overall performance. The table presents execution times for the purely sequential implementation, the \textbf{OpenMP} implementation, and the \textbf{CUDA} implementation. These results, obtained from 100 iterations of the algorithm, represent the mean calculated values derived from running the algorithm five times.The names were shortened in the table \footnote{\textbf{Description:} SQT -- Sequential Time, OMPT -- OpenMP Time, CUDAT -- CUDA Time}.
+After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now have a clearer understanding of the overall performance. The table presents execution times for the purely sequential implementation, the \textbf{OpenMP} implementation, and the \textbf{CUDA} implementation. These results, obtained from 100 iterations of the algorithm, represent the mean calculated values derived from running the algorithm five times.The names were shortened in Table \ref{table:final}\footnote{\textbf{Description:} SQT -- Sequential Time, OMPT -- OpenMP Time, CUDAT -- CUDA Time}.
 
-Each generation of results was derived from the average of five separate runs the algorithm with 100 iterations. By calculating the mean of these five separate executions, we aimed to obtain more reliable and trustworthy results. This approach ensured that our findings were not skewed by anomalies in any single run, providing a more accurate representation of the algorithm's performance.
+Each generation of results was derived from the average of five separate runs of algorithm with 100 iterations. By calculating the mean of these five separate executions, we aimed to obtain more reliable and trustworthy results. This approach ensured that our findings were not skewed by anomalies in any single run, providing a more accurate representation of the algorithm's performance.
 
 \begin{table}[h!]
 \centering
@@ -335,7 +335,7 @@ Whether through the integration of OpenMP directives or harnessing the power of 
 
 \section{Code}
 All the code mentioned above can be consulted in \url{https://github.com/Gui28F/CP-Project}.
-\section{Individual Contribution and Comments}
+\section{Individual Contribution and Acknowledgments}
 The project was a joint effort, with both team members sharing the workload equally. We utilized pair programming sessions on Discord calls and in the lab to accomplish our tasks effectively. We are grateful to Professor Hervé for his invaluable support and constant availability to assist us throughout the project.
 \bibliographystyle{acm}
 \bibliography{refs}
