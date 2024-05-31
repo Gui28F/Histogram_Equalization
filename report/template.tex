@@ -231,7 +231,7 @@ __global__ void normalize_kernel(//omitting for space) {
     }
 \end{lstlisting}
 
-Before proceeding to the second kernel, it's essential to calculate the histogram. While we could create a custom kernel for this task, a more efficient approach involves leveraging the \texttt{\textbf{CUB}} library. By utilizing its operations, we can significantly enhance the performance of our code.
+Before proceeding to the second kernel, it's essential to calculate the histogram. While we could create a custom kernel for this task, a more efficient approach involves leveraging the \texttt{\textbf{CUB}} library ~\cite{cub}. By utilizing its operations, we can significantly enhance the performance of our code.
 
 Using \texttt{\textbf{cub::DeviceHistogram::HistogramEven}} we are able to calculate the histogram in the GPU without making the kernel ourselves.
 
@@ -285,7 +285,7 @@ To effectively evaluate the performance of the GPU-accelerated version, it's imp
 
 
 \section{Final Results}
-After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now have a clearer understanding of the overall performance. The table presents execution times for the purely sequential implementation, the \textbf{OpenMP} implementation, and the \textbf{CUDA} implementation. These results, obtained from 100 iterations of the algorithm, represent the mean calculated values derived from running the algorithm five times.The names were shortened in Table \ref{table:final}\footnote{\textbf{Description:} SQT -- Sequential Time, OMPT -- OpenMP Time, CUDAT -- CUDA Time}.
+After implementing optimizations using \textbf{OpenMP} and \textbf{CUDA}, we now have a clearer understanding of the overall performance. The table presents execution times for the purely sequential implementation, the \textbf{OpenMP} implementation, and the \textbf{CUDA} implementation. These results, obtained from 100 iterations of the algorithm, represent the mean calculated values derived from running the algorithm five times. The names were shortened in Table \ref{table:final}\footnote{\textbf{Description:} SQT -- Sequential Time, OMPT -- OpenMP Time, CUDAT -- CUDA Time}.
 
 Each generation of results was derived from the average of five separate runs of algorithm with 100 iterations. By calculating the mean of these five separate executions, we aimed to obtain more reliable and trustworthy results. This approach ensured that our findings were not skewed by anomalies in any single run, providing a more accurate representation of the algorithm's performance.
 
@@ -338,6 +338,6 @@ All the code mentioned above can be consulted in \url{https://github.com/Gui28F/
 \section{Individual Contribution and Acknowledgments}
 The project was a joint effort, with both team members sharing the workload equally. We utilized pair programming sessions on Discord calls and in the lab to accomplish our tasks effectively. We are grateful to Professor Hervé for his invaluable support and constant availability to assist us throughout the project.
 \bibliographystyle{acm}
-\bibliography{refs}
+\bibliography{my_bib}
 
 \end{document}

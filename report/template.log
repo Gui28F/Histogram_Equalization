@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  29 MAY 2024 22:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.6)  31 MAY 2024 15:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1046,7 +1046,7 @@ r/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr
 
 {/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{
 /usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}]
-<images/openMP.png, id=105, 722.7pt x 433.62pt>
+<images/openMP.png, id=109, 722.7pt x 433.62pt>
 File: images/openMP.png Graphic file (type png)
 <use images/openMP.png>
 Package pdftex.def Info: images/openMP.png  used on input line 165.
@@ -1084,7 +1084,7 @@ LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
 [2.2{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.e
 nc}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/libertine/lbtn_7f4ce4.en
 c} <./images/openMP.png>]
-<images/tilesss.png, id=142, 718.93594pt x 436.63126pt>
+<images/tilesss.png, id=148, 718.93594pt x 436.63126pt>
 File: images/tilesss.png Graphic file (type png)
 <use images/tilesss.png>
 Package pdftex.def Info: images/tilesss.png  used on input line 271.
@@ -1096,7 +1096,7 @@ Class acmart Warning: A possible image without description on input line 274.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<images/openMPCUDA.png, id=144, 722.7pt x 433.62pt>
+<images/openMPCUDA.png, id=150, 722.7pt x 433.62pt>
 File: images/openMPCUDA.png Graphic file (type png)
 <use images/openMPCUDA.png>
 Package pdftex.def Info: images/openMPCUDA.png  used on input line 279.
@@ -1112,8 +1112,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[3.3 <./images/tilesss.png> <./images/openMPCUDA.png>]
-No file template.bbl.
+[3.3 <./images/tilesss.png> <./images/openMPCUDA.png>] (./template.bbl)
 
 Class acmart Warning: Some images may lack descriptions.
 
@@ -1126,6 +1125,10 @@ Class acmart Warning: ACM reference format is mandatory
 
 Class acmart Warning: CCS concepts are mandatory for papers over two pages.
 
+
+Overfull \vbox (2.11443pt too high) has occurred while \output is active []
+
+
 (/usr/local/texlive/2023/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 )
@@ -1133,20 +1136,14 @@ File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
 ) [4.4]
 (./template.aux)
-
-Package rerunfilecheck Warning: File `template.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `template.out':
-(rerunfilecheck)             Before: 9C4D5B57A9DF6DE2D8ECB35B3C57A660;1948
-(rerunfilecheck)             After:  6C28214643E7218B839A7F1B1990E852;1953.
+Package rerunfilecheck Info: File `template.out' has not changed.
+(rerunfilecheck)             Checksum: F669E80BAC1E15337A2B3C8E1E953EB4;2049.
  ) 
 Here is how much of TeX's memory you used:
- 22920 strings out of 476025
- 367189 string characters out of 5790018
+ 22942 strings out of 476025
+ 367442 string characters out of 5790018
  2228388 words of memory out of 5000000
- 42430 multiletter control sequences out of 15000+600000
+ 42447 multiletter control sequences out of 15000+600000
  635470 words of font info for 263 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  85i,12n,131p,1005b,1726s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1160,10 +1157,10 @@ blic/libertine/LinLibertineT.pfb></usr/local/texlive/2023/texmf-dist/fonts/type
 1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2023/texmf-dist/fonts
 /type1/public/newtx/txmiaX.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/
 public/newtx/txsys.pfb>
-Output written on template.pdf (4 pages, 526673 bytes).
+Output written on template.pdf (4 pages, 527182 bytes).
 PDF statistics:
- 253 PDF objects out of 1000 (max. 8388607)
- 216 compressed objects within 3 object streams
- 88 named destinations out of 1000 (max. 500000)
- 74376 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 262 PDF objects out of 1000 (max. 8388607)
+ 225 compressed objects within 3 object streams
+ 91 named destinations out of 1000 (max. 500000)
+ 74384 words of extra memory for PDF output out of 89155 (max. 10000000)
 
