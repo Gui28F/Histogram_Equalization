@@ -3,7 +3,7 @@
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ../..
-
+make
 echo "Sequential(n_iterations = 100):"
 echo "Average time for borabora_1.ppm photo:"
 ./project ../../dataset/borabora_1.ppm 100 output.ppm 1
